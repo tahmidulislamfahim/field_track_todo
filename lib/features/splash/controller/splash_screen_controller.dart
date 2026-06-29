@@ -24,13 +24,13 @@ class SplashScreenController extends GetxController {
           print('accessToken: $accessToken');
           print('refreshToken: $refreshToken');
 
-          //Get.offAllNamed(AppRoutes.home);
+          Get.offAllNamed(AppRoutes.navBarScreen);
         } catch (e) {
           debugPrint('Error fetching profile on splash onboarding check: $e');
-          Get.offAllNamed(AppRoutes.onboarding);
+          Get.offAllNamed(AppRoutes.login);
         }
       } else {
-        Get.offNamed(AppRoutes.onboarding);
+        Get.offAllNamed(AppRoutes.login);
       }
     });
   }
