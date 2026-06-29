@@ -1,9 +1,10 @@
+import 'package:field_track_todo/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginScreenController extends GetxController {
   final formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController emailController;
   late TextEditingController passwordController;
 
@@ -55,20 +56,11 @@ class LoginScreenController extends GetxController {
     }
 
     isLoading.value = true;
-    
+
     try {
-      // Simulate network authentication request
       await Future.delayed(const Duration(milliseconds: 1500));
-      
-      Get.snackbar(
-        'Success',
-        'Signed in successfully!',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.teal.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 16,
-      );
+
+      Get.offAllNamed(AppRoutes.navBarScreen);
     } catch (e) {
       Get.snackbar(
         'Error',

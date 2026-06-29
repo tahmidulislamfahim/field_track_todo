@@ -7,7 +7,7 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: AppColors.lightPrimary,
       scaffoldBackgroundColor: AppColors.lightBackground,
-      fontFamily: 'Inter', // Default fallback font
+      fontFamily: 'Inter',
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightPrimary,
         surface: AppColors.lightBackground,
@@ -104,7 +104,7 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: AppColors.darkPrimary,
         surface: AppColors.darkBackground,
-        onPrimary: AppColors.darkBackground, // Dark background on cyan button looks very premium!
+        onPrimary: AppColors.darkBackground,
         onSurface: AppColors.darkTextPrimary,
         error: AppColors.red,
       ),
@@ -174,8 +174,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.darkPrimary,
-          foregroundColor: AppColors.darkBackground, // Very dark text on bright cyan background
-          elevation: 0,
+          foregroundColor: AppColors.darkBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
