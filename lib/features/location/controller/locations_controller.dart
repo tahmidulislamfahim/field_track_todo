@@ -73,4 +73,17 @@ class LocationsController extends GetxController {
       search(searchQuery.value);
     }
   }
+
+  void updateLocation(LocationModel updated) {
+    final index = locations.indexWhere((loc) => loc.id == updated.id);
+    if (index != -1) {
+      locations[index] = updated;
+      search(searchQuery.value);
+    }
+  }
+
+  void deleteLocation(String id) {
+    locations.removeWhere((loc) => loc.id == id);
+    search(searchQuery.value);
+  }
 }

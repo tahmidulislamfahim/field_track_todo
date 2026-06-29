@@ -6,29 +6,28 @@ class LocationCard extends StatelessWidget {
   final LocationModel location;
   final VoidCallback? onTap;
 
-  const LocationCard({
-    super.key,
-    required this.location,
-    this.onTap,
-  });
+  const LocationCard({super.key, required this.location, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Resolve colors based on status and theme
-    final Color cardBg = isDark
-        ? AppColors.darkFieldBackground
-        : Colors.white;
+    final Color cardBg = isDark ? AppColors.darkFieldBackground : Colors.white;
 
     final Color leadingBg = location.isActive
-        ? (isDark ? AppColors.darkLocationActiveBg : AppColors.lightLocationActiveBg)
-        : (isDark ? AppColors.darkLocationInactiveBg : AppColors.lightLocationInactiveBg);
+        ? (isDark
+              ? AppColors.darkLocationActiveBg
+              : AppColors.lightLocationActiveBg)
+        : (isDark
+              ? AppColors.darkLocationInactiveBg
+              : AppColors.lightLocationInactiveBg);
 
     final Color leadingIconColor = location.isActive
         ? (isDark ? AppColors.darkPrimary : AppColors.lightPrimary)
-        : (isDark ? AppColors.darkStatusInactiveText : AppColors.lightStatusInactiveText);
+        : (isDark
+              ? AppColors.darkStatusInactiveText
+              : AppColors.lightStatusInactiveText);
 
     final Color radiusBg = isDark
         ? AppColors.darkLocationInactiveBg
@@ -39,12 +38,20 @@ class LocationCard extends StatelessWidget {
         : AppColors.lightStatusInactiveText;
 
     final Color statusBg = location.isActive
-        ? (isDark ? AppColors.darkLocationActiveBg : AppColors.lightLocationActiveBg)
-        : (isDark ? AppColors.darkLocationInactiveBg : AppColors.lightLocationInactiveBg);
+        ? (isDark
+              ? AppColors.darkLocationActiveBg
+              : AppColors.lightLocationActiveBg)
+        : (isDark
+              ? AppColors.darkLocationInactiveBg
+              : AppColors.lightLocationInactiveBg);
 
     final Color statusTextColor = location.isActive
-        ? (isDark ? AppColors.darkStatusActiveText : AppColors.lightStatusActiveText)
-        : (isDark ? AppColors.darkStatusInactiveText : AppColors.lightStatusInactiveText);
+        ? (isDark
+              ? AppColors.darkStatusActiveText
+              : AppColors.lightStatusActiveText)
+        : (isDark
+              ? AppColors.darkStatusInactiveText
+              : AppColors.lightStatusInactiveText);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -70,7 +77,6 @@ class LocationCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                // Leading Icon Container
                 Container(
                   width: 48,
                   height: 48,
@@ -88,12 +94,10 @@ class LocationCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
 
-                // Middle Text & Details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title
                       Text(
                         location.name,
                         style: theme.textTheme.bodyLarge?.copyWith(
@@ -104,7 +108,6 @@ class LocationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
 
-                      // Coordinates
                       Row(
                         children: [
                           Icon(
@@ -129,10 +132,8 @@ class LocationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
 
-                      // Pills Row
                       Row(
                         children: [
-                          // Radius Pill
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -153,7 +154,6 @@ class LocationCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
 
-                          // Status Pill
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -178,7 +178,6 @@ class LocationCard extends StatelessWidget {
                   ),
                 ),
 
-                // Trailing Chevron
                 Icon(
                   Icons.chevron_right,
                   color: isDark

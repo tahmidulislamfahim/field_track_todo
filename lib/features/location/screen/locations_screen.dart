@@ -85,7 +85,13 @@ class LocationsScreen extends StatelessWidget {
                   itemCount: controller.filteredLocations.length,
                   itemBuilder: (context, index) {
                     final location = controller.filteredLocations[index];
-                    return LocationCard(location: location, onTap: () {});
+                    return LocationCard(
+                      location: location,
+                      onTap: () => Get.toNamed(
+                        AppRoutes.editLocationScreen,
+                        arguments: location,
+                      ),
+                    );
                   },
                 );
               }),
