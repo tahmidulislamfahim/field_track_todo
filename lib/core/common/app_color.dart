@@ -17,6 +17,26 @@ class AppColors {
   static const Color darkTextSecondary = Color(0xFF9CA3AF); // Light gray
   static const Color darkBorder = Color(0xFF252D3D); // Slate gray border
 
+  // Profile colors
+  static const Color lightProfileCardBg = Color(0xFFFFFFFF);
+  static const Color darkProfileCardBg = Color(0xFF161B26);
+  static const Color lightProfileAvatarBg = Color(0xFFE6F4F1);
+  static const Color darkProfileAvatarBg = Color(0xFF0F2D2A);
+  static const Color lightProfileIconBg = Color(0xFFF3F4F6);
+  static const Color darkProfileIconBg = Color(0xFF252D3D);
+  static const Color lightProfileDivider = Color(0xFFE5E7EB);
+  static const Color darkProfileDivider = Color(0xFF252D3D);
+
+  // Location colors
+  static const Color lightLocationActiveBg = Color(0xFFE6F4F1);
+  static const Color darkLocationActiveBg = Color(0xFF0F2D2A);
+  static const Color lightLocationInactiveBg = Color(0xFFF3F4F6);
+  static const Color darkLocationInactiveBg = Color(0xFF252D3D);
+  static const Color lightStatusActiveText = Color(0xFF0D9488);
+  static const Color darkStatusActiveText = Color(0xFF2DD4BF);
+  static const Color lightStatusInactiveText = Color(0xFF6B7280);
+  static const Color darkStatusInactiveText = Color(0xFF9CA3AF);
+
   // Common colors
   static const Color lightLogoText = Color(0xFF1E293B);
   static const Color lightLabelText = Color(0xFF4B5563);
