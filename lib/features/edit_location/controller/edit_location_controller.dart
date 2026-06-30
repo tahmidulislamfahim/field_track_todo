@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 
 class EditLocationController extends GetxController {
   late LocationModel originalLocation;
@@ -62,94 +60,6 @@ class EditLocationController extends GetxController {
     } catch (_) {}
   }
 
-  Future<void> useCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      Get.snackbar(
-        'Location Services Disabled',
-        'Please enable location services on your device.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Get.snackbar(
-          'Permission Denied',
-          'Location permissions are denied.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      Get.snackbar(
-        'Permission Permanently Denied',
-        'Location permissions are permanently denied.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
-
-      latitude.value = position.latitude;
-      longitude.value = position.longitude;
-
-      latitudeController.text = position.latitude.toString();
-      longitudeController.text = position.longitude.toString();
-      _moveMap();
-
-      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        final placemark = placemarks.first;
-        final String? street = placemark.street;
-        final String? locality = placemark.locality;
-        final String? subAdministrativeArea = placemark.subAdministrativeArea;
-
-        String name = '';
-        if (street != null && street.isNotEmpty) {
-          name = street;
-        } else if (locality != null && locality.isNotEmpty) {
-          name = locality;
-        } else if (subAdministrativeArea != null && subAdministrativeArea.isNotEmpty) {
-          name = subAdministrativeArea;
-        } else {
-          name = 'My Location';
-        }
-
-        nameController.text = name;
-      } else {
-        nameController.text = 'My Location';
-      }
-
-      Get.snackbar(
-        'Success',
-        'Fetched current device location',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to fetch device location: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
   void updateRadius(double value) {
     radius.value = value;
   }
@@ -164,15 +74,27 @@ class EditLocationController extends GetxController {
     final lng = double.tryParse(longitudeController.text);
 
     if (name.isEmpty) {
-      Get.snackbar('Error', 'Please enter a location name', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Please enter a location name',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
     if (lat == null) {
-      Get.snackbar('Error', 'Please enter a valid latitude', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Please enter a valid latitude',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
     if (lng == null) {
-      Get.snackbar('Error', 'Please enter a valid longitude', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Please enter a valid longitude',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -189,9 +111,17 @@ class EditLocationController extends GetxController {
       locationsController.updateLocation(updatedLoc);
 
       Get.back();
-      Get.snackbar('Success', 'Location updated successfully', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Success',
+        'Location updated successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Could not update location.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Could not update location.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -201,9 +131,17 @@ class EditLocationController extends GetxController {
       locationsController.deleteLocation(originalLocation.id);
 
       Get.back();
-      Get.snackbar('Success', 'Location deleted successfully', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Success',
+        'Location deleted successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Could not delete location.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error',
+        'Could not delete location.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
