@@ -1,4 +1,6 @@
 import 'package:field_track_todo/features/tasks/model/task_model.dart';
+import 'package:field_track_todo/features/tasks/service/task_service.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 enum TaskFilter { all, pending, completed }
@@ -6,64 +8,78 @@ enum TaskFilter { all, pending, completed }
 class TasksController extends GetxController {
   final tasks = <Task>[].obs;
   final activeFilter = TaskFilter.all.obs;
+  final isLoading = false.obs;
+
+  final TaskService _taskService = Get.put(TaskService());
 
   @override
   void onInit() {
     super.onInit();
-    _loadMockTasks();
+    getTodos();
   }
 
-  void _loadMockTasks() {
-    tasks.assignAll([
-      Task(
-        id: '1',
-        title: 'Take inventory count',
-        description: 'Count shelf stock and storage stock',
-        time: '9:30 AM',
-        isCompleted: true,
-      ),
-      Task(
-        id: '2',
-        title: 'Visit branch manager',
-        description: 'Collect signed documents',
-        time: '10:00 AM',
-        isCompleted: false,
-      ),
-      Task(
-        id: '3',
-        title: 'Verify delivery shipment',
-        description: 'Check items against the manifest',
-        time: '11:30 AM',
-        isCompleted: false,
-      ),
-      Task(
-        id: '4',
-        title: 'Update store display',
-        description: 'Arrange promotional materials',
-        time: '2:00 PM',
-        isCompleted: false,
-      ),
-      Task(
-        id: '5',
-        title: 'Submit daily report',
-        description: 'Log visit summary and photos',
-        time: '5:00 PM',
-        isCompleted: false,
-      ),
-    ]);
+  Future<void> getTodos() async {
+    isLoading.value = true;
+    try {
+      final response = await _taskService.fetchTodos();
+      if (response.status.isOk) {
+        final body = response.body;
+        if (body != null && body is Map && body['data'] != null) {
+          final List rawData = body['data'];
+          final parsed = rawData.map((json) => Task.fromJson(Map<String, dynamic>.from(json))).toList();
+          tasks.assignAll(parsed);
+        }
+      } else {
+        EasyLoading.showError('Failed to load tasks.');
+      }
+    } catch (e) {
+      EasyLoading.showError('An error occurred loading tasks.');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void toggleTaskCompletion(Task task) {
-    task.isCompleted.value = !task.isCompleted.value;
+  Future<void> toggleTaskCompletion(Task task) async {
+    final nextStatus = !task.isCompleted.value;
+    final now = DateTime.now();
+
+    EasyLoading.show(status: nextStatus ? 'Completing task...' : 'Reopening task...');
+
+    try {
+      final response = await _taskService.updateTodo(
+        todoId: task.id,
+        isCompleted: nextStatus,
+        updatedAt: now,
+      );
+
+      if (response.status.isOk) {
+        task.isCompleted.value = nextStatus;
+        task.updatedAt = now;
+        tasks.refresh();
+        EasyLoading.showSuccess(nextStatus ? 'Task completed' : 'Task reopened');
+      } else {
+        EasyLoading.showError('Failed to update task.');
+      }
+    } catch (e) {
+      EasyLoading.showError('An error occurred.');
+    }
   }
 
   void changeFilter(TaskFilter filter) {
     activeFilter.value = filter;
   }
 
+  bool _isToday(DateTime dateTime) {
+    final utcDate = dateTime.toUtc();
+    final nowUtc = DateTime.now().toUtc();
+    return utcDate.year == nowUtc.year &&
+           utcDate.month == nowUtc.month &&
+           utcDate.day == nowUtc.day;
+  }
+
   int get totalCount => tasks.length;
 
-  int get completedCount => tasks.where((task) => task.isCompleted.value).length;
+  int get completedCount => tasks.where((task) => task.isCompleted.value && _isToday(task.updatedAt)).length;
 
   double get progressPercent {
     if (totalCount == 0) return 0.0;

@@ -10,4 +10,6 @@ class Endpoints {
   static const String locations = '$baseUrl/api/v1/locations';
   static String deleteOrEditLocation(String locationId) =>
       '$baseUrl/api/v1/locations/$locationId';
+  static String getAllTodo = '$baseUrl/api/v1/todos';
+  static String updateTodo(String todoId) => '$baseUrl/api/v1/todos/$todoId';
 }

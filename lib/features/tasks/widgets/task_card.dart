@@ -123,8 +123,8 @@ class TaskCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             completed
-                                ? 'Done ${task.time}'
-                                : 'Due ${task.time}',
+                                ? 'Done ${_formatDateTime(task.updatedAt)}'
+                                : 'Due ${_formatDateTime(task.dueAt)}',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark
@@ -145,5 +145,14 @@ class TaskCard extends StatelessWidget {
         ),
       );
     });
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final month = months[dateTime.month - 1];
+    return '$month ${dateTime.day}, $hour:$minute $period';
   }
 }
