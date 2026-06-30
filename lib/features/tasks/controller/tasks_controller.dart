@@ -94,12 +94,29 @@ class TasksController extends GetxController {
         EasyLoading.showSuccess(
           nextStatus ? 'Task completed' : 'Task reopened',
         );
-      } else {
+      } else if (response.status.connectionError || response.statusCode == null) {
         _saveOfflineFallback(task, nextStatus, now);
+      } else {
+        final errorMsg = _getErrorMessage(response);
+        EasyLoading.showError(errorMsg);
       }
     } catch (e) {
       _saveOfflineFallback(task, nextStatus, now);
     }
+  }
+
+  String _getErrorMessage(Response response) {
+    final body = response.body;
+    if (body != null && body is Map) {
+      final error = body['error'];
+      if (error != null && error is Map && error['message'] != null) {
+        return error['message'].toString();
+      }
+      if (body['message'] != null) {
+        return body['message'].toString();
+      }
+    }
+    return 'Failed to update task (${response.statusCode})';
   }
 
   void _saveOfflineFallback(Task task, bool nextStatus, DateTime now) {
