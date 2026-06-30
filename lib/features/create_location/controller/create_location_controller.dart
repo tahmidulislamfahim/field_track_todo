@@ -173,10 +173,10 @@ class CreateLocationController extends GetxController {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
     final newLoc = LocationModel(
       id: id,
-      name: name,
+      locationName: name,
       latitude: lat,
       longitude: lng,
-      radius: radius.value,
+      radiusM: radius.value,
       isActive: isActive.value,
     );
 

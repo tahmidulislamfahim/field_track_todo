@@ -99,10 +99,11 @@ class EditLocationController extends GetxController {
     }
 
     final updatedLoc = originalLocation.copyWith(
-      name: name,
+      id: originalLocation.id,
+      locationName: name,
       latitude: lat,
       longitude: lng,
-      radius: radius.value,
+      radiusM: radius.value,
       isActive: isActive.value,
     );
 

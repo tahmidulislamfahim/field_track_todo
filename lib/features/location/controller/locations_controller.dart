@@ -1,46 +1,42 @@
 import 'package:field_track_todo/features/location/model/location_model.dart';
+import 'package:field_track_todo/features/location/service/location_service.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class LocationsController extends GetxController {
   final locations = <LocationModel>[].obs;
   final filteredLocations = <LocationModel>[].obs;
   final searchQuery = ''.obs;
+  final isLoading = false.obs;
+
+  final LocationService _locationService = Get.put(LocationService());
 
   @override
   void onInit() {
     super.onInit();
-    _initializeMockLocations();
+    getLocations();
   }
 
-  void _initializeMockLocations() {
-    final mockList = [
-      LocationModel(
-        id: '1',
-        name: 'Downtown Branch',
-        latitude: 25.2048,
-        longitude: 55.2708,
-        radius: 150.0,
-        isActive: true,
-      ),
-      LocationModel(
-        id: '2',
-        name: 'Warehouse',
-        latitude: 25.2101,
-        longitude: 55.2801,
-        radius: 200.0,
-        isActive: true,
-      ),
-      LocationModel(
-        id: '3',
-        name: 'North Depot',
-        latitude: 25.1980,
-        longitude: 55.2650,
-        radius: 120.0,
-        isActive: false,
-      ),
-    ];
-    locations.assignAll(mockList);
-    filteredLocations.assignAll(mockList);
+  Future<void> getLocations() async {
+    isLoading.value = true;
+    try {
+      final response = await _locationService.fetchLocations();
+      if (response.status.isOk) {
+        final body = response.body;
+        if (body != null && body is Map && body['data'] != null) {
+          final List rawData = body['data'];
+          final parsed = rawData.map((json) => LocationModel.fromJson(json)).toList();
+          locations.assignAll(parsed);
+          search(searchQuery.value);
+        }
+      } else {
+        EasyLoading.showError('Failed to load locations.');
+      }
+    } catch (e) {
+      EasyLoading.showError('An error occurred loading locations.');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void search(String query) {
@@ -51,7 +47,7 @@ class LocationsController extends GetxController {
       final lowercaseQuery = query.toLowerCase();
       filteredLocations.assignAll(
         locations.where((loc) {
-          final matchesName = loc.name.toLowerCase().contains(lowercaseQuery);
+          final matchesName = loc.locationName.toLowerCase().contains(lowercaseQuery);
           final matchesLat = loc.latitude.toString().contains(lowercaseQuery);
           final matchesLng = loc.longitude.toString().contains(lowercaseQuery);
           return matchesName || matchesLat || matchesLng;

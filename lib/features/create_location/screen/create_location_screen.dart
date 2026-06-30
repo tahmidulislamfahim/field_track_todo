@@ -18,9 +18,7 @@ class CreateLocationScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color backButtonBg = isDark
-        ? AppColors.darkBorder
-        : AppColors.lightLocationInactiveBg;
+    final Color backButtonBg = isDark ? AppColors.darkBorder : Colors.white;
 
     final Color labelColor = isDark
         ? AppColors.darkTextSecondary
