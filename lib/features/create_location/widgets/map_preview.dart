@@ -31,10 +31,7 @@ class MapPreview extends StatelessWidget {
           () => FlutterMap(
             mapController: controller.mapController,
             options: MapOptions(
-              initialCenter: LatLng(
-                controller.latitude.value,
-                controller.longitude.value,
-              ),
+              initialCenter: LatLng(controller.latitude, controller.longitude),
               initialZoom: 15.0,
             ),
             children: [
@@ -45,11 +42,8 @@ class MapPreview extends StatelessWidget {
               CircleLayer(
                 circles: [
                   CircleMarker(
-                    point: LatLng(
-                      controller.latitude.value,
-                      controller.longitude.value,
-                    ),
-                    radius: controller.radius.value,
+                    point: LatLng(controller.latitude, controller.longitude),
+                    radius: controller.radius,
                     useRadiusInMeter: true,
                     color: theme.primaryColor.withValues(alpha: 0.15),
                     borderColor: theme.primaryColor,
@@ -60,10 +54,7 @@ class MapPreview extends StatelessWidget {
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: LatLng(
-                      controller.latitude.value,
-                      controller.longitude.value,
-                    ),
+                    point: LatLng(controller.latitude, controller.longitude),
                     width: 40,
                     height: 40,
                     child: Icon(

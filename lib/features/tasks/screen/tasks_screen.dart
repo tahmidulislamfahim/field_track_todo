@@ -18,10 +18,10 @@ class TasksScreen extends StatelessWidget {
     final Color cardBg = isDark ? AppColors.darkFieldBackground : Colors.white;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -45,7 +45,12 @@ class TasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              TaskProgressCard(cardBg: cardBg, isDark: isDark, controller: controller, theme: theme),
+              TaskProgressCard(
+                cardBg: cardBg,
+                isDark: isDark,
+                controller: controller,
+                theme: theme,
+              ),
               const SizedBox(height: 24),
 
               Obx(() {
@@ -55,11 +60,34 @@ class TasksScreen extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      TaskFilterChip(label: 'All', filter: TaskFilter.all, activeFilter: active, onTap: () => controller.changeFilter(TaskFilter.all), theme: theme, isDark: isDark),
+                      TaskFilterChip(
+                        label: 'All',
+                        filter: TaskFilter.all,
+                        activeFilter: active,
+                        onTap: () => controller.changeFilter(TaskFilter.all),
+                        theme: theme,
+                        isDark: isDark,
+                      ),
                       const SizedBox(width: 10),
-                      TaskFilterChip(label: 'Pending', filter: TaskFilter.pending, activeFilter: active, onTap: () => controller.changeFilter(TaskFilter.pending), theme: theme, isDark: isDark),
+                      TaskFilterChip(
+                        label: 'Pending',
+                        filter: TaskFilter.pending,
+                        activeFilter: active,
+                        onTap: () =>
+                            controller.changeFilter(TaskFilter.pending),
+                        theme: theme,
+                        isDark: isDark,
+                      ),
                       const SizedBox(width: 10),
-                      TaskFilterChip(label: 'Completed', filter: TaskFilter.completed, activeFilter: active, onTap: () => controller.changeFilter(TaskFilter.completed), theme: theme, isDark: isDark),
+                      TaskFilterChip(
+                        label: 'Completed',
+                        filter: TaskFilter.completed,
+                        activeFilter: active,
+                        onTap: () =>
+                            controller.changeFilter(TaskFilter.completed),
+                        theme: theme,
+                        isDark: isDark,
+                      ),
                     ],
                   ),
                 );
@@ -92,7 +120,8 @@ class TasksScreen extends StatelessWidget {
                     final task = filtered[index];
                     return TaskCard(
                       task: task,
-                      onTapCheckbox: () => controller.toggleTaskCompletion(task),
+                      onTapCheckbox: () =>
+                          controller.toggleTaskCompletion(task),
                     );
                   },
                 );

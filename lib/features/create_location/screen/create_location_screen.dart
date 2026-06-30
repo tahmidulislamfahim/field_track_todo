@@ -37,10 +37,10 @@ class CreateLocationScreen extends StatelessWidget {
         : AppColors.lightBorder;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -150,7 +150,7 @@ class CreateLocationScreen extends StatelessWidget {
                   ),
                   Obx(
                     () => Text(
-                      '${controller.radius.value.toInt()} m',
+                      '${controller.radius.toInt()} m',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -179,7 +179,7 @@ class CreateLocationScreen extends StatelessWidget {
                   child: Slider(
                     min: 50.0,
                     max: 1000.0,
-                    value: controller.radius.value,
+                    value: controller.radius,
                     onChanged: controller.updateRadius,
                   ),
                 ),

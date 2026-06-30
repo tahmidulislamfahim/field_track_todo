@@ -13,11 +13,19 @@ class CreateLocationController extends GetxController {
   final latitudeController = TextEditingController();
   final longitudeController = TextEditingController();
 
-  final radius = 150.0.obs;
+  final _radius = 150.0.obs;
+  double get radius => _radius.value;
+  set radius(double val) => _radius.value = val;
+
   final isActive = true.obs;
 
-  final latitude = 25.2048.obs;
-  final longitude = 55.2708.obs;
+  final _latitude = 0.0.obs;
+  double get latitude => _latitude.value;
+  set latitude(double val) => _latitude.value = val;
+
+  final _longitude = 0.0.obs;
+  double get longitude => _longitude.value;
+  set longitude(double val) => _longitude.value = val;
 
   final MapController mapController = MapController();
   final CreateLocationService _createLocationService = Get.put(
@@ -27,32 +35,34 @@ class CreateLocationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    latitudeController.text = latitude.value.toString();
-    longitudeController.text = longitude.value.toString();
+    latitudeController.text = latitude == 0.0 ? '' : latitude.toString();
+    longitudeController.text = longitude == 0.0 ? '' : longitude.toString();
 
     latitudeController.addListener(_onLatitudeChanged);
     longitudeController.addListener(_onLongitudeChanged);
+
+    useCurrentLocation();
   }
 
   void _onLatitudeChanged() {
     final val = double.tryParse(latitudeController.text);
-    if (val != null && val != latitude.value) {
-      latitude.value = val;
+    if (val != null && val != latitude) {
+      latitude = val;
       _moveMap();
     }
   }
 
   void _onLongitudeChanged() {
     final val = double.tryParse(longitudeController.text);
-    if (val != null && val != longitude.value) {
-      longitude.value = val;
+    if (val != null && val != longitude) {
+      longitude = val;
       _moveMap();
     }
   }
 
   void _moveMap() {
     try {
-      mapController.move(LatLng(latitude.value, longitude.value), 15.0);
+      mapController.move(LatLng(latitude, longitude), 15.0);
     } catch (_) {}
   }
 
@@ -87,8 +97,8 @@ class CreateLocationController extends GetxController {
         ),
       );
 
-      latitude.value = position.latitude;
-      longitude.value = position.longitude;
+      latitude = position.latitude;
+      longitude = position.longitude;
 
       latitudeController.text = position.latitude.toString();
       longitudeController.text = position.longitude.toString();
@@ -128,7 +138,7 @@ class CreateLocationController extends GetxController {
   }
 
   void updateRadius(double value) {
-    radius.value = value;
+    radius = value;
   }
 
   void toggleActive(bool value) {
@@ -160,7 +170,7 @@ class CreateLocationController extends GetxController {
         name: name,
         latitude: lat,
         longitude: lng,
-        radiusM: radius.value,
+        radiusM: radius,
       );
 
       if (response.status.isOk) {
