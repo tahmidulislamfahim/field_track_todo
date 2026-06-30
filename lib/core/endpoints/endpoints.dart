@@ -12,4 +12,5 @@ class Endpoints {
       '$baseUrl/api/v1/locations/$locationId';
   static String getAllTodo = '$baseUrl/api/v1/todos';
   static String updateTodo(String todoId) => '$baseUrl/api/v1/todos/$todoId';
+  static String syncTodo = '$baseUrl/api/v1/todos/sync';
 }

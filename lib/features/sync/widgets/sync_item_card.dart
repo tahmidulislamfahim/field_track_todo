@@ -51,7 +51,9 @@ class SyncItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              item.icon,
+              item.isCompleted
+                  ? Icons.check_circle_outline
+                  : Icons.assignment_outlined,
               color: isDark
                   ? AppColors.darkTextPrimary
                   : AppColors.lightTextPrimary,
@@ -76,7 +78,7 @@ class SyncItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Marked done • ${item.time}',
+                  '${item.isCompleted ? 'Marked done' : 'Reopened'} • ${_formatTime(item.updatedAt)}',
                   style: TextStyle(
                     fontSize: 13,
                     color: isDark
@@ -106,5 +108,14 @@ class SyncItemCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 }

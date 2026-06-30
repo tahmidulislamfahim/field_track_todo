@@ -115,6 +115,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 onPressed: controller.signOut,
               ),
+              const SizedBox(height: 10),
             ],
           ),
         ),

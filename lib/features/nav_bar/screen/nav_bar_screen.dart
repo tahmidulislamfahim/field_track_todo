@@ -22,9 +22,7 @@ class NavBarScreen extends StatelessWidget {
         ? AppColors.darkTextSecondary
         : AppColors.lightTextSecondary;
 
-    final Color navBarBg = isDark
-        ? const Color(0xFF111827)
-        : Colors.white;
+    final Color navBarBg = isDark ? const Color(0xFF111827) : Colors.white;
 
     final List<Widget> pages = const [
       TasksScreen(),
@@ -62,10 +60,38 @@ class NavBarScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                NavItem(index: 0, label: 'Tasks', icon: Icons.format_list_bulleted, controller: controller, activeColor: activeColor, inactiveColor: inactiveColor),
-                NavItem(index: 1, label: 'Locations', icon: Icons.location_on_outlined, controller: controller, activeColor: activeColor, inactiveColor: inactiveColor),
-                NavItem(index: 2, label: 'Sync', icon: Icons.sync, controller: controller, activeColor: activeColor, inactiveColor: inactiveColor),
-                NavItem(index: 3, label: 'Profile', icon: Icons.person_outline, controller: controller, activeColor: activeColor, inactiveColor: inactiveColor),
+                NavItem(
+                  index: 0,
+                  label: 'Tasks',
+                  icon: Icons.format_list_bulleted,
+                  controller: controller,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                ),
+                NavItem(
+                  index: 1,
+                  label: 'Locations',
+                  icon: Icons.location_on_outlined,
+                  controller: controller,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                ),
+                NavItem(
+                  index: 2,
+                  label: 'Sync',
+                  icon: Icons.sync,
+                  controller: controller,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                ),
+                NavItem(
+                  index: 3,
+                  label: 'Profile',
+                  icon: Icons.person_outline,
+                  controller: controller,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                ),
               ],
             ),
           ),

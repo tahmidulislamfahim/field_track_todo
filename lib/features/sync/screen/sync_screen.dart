@@ -101,6 +101,8 @@ class SyncScreen extends StatelessWidget {
                 theme: theme,
                 isDark: isDark,
               ),
+
+              const SizedBox(height: 10),
             ],
           ),
         ),

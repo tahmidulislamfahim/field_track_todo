@@ -1,3 +1,4 @@
+import 'package:field_track_todo/features/sync/controller/sync_controller.dart';
 import 'package:field_track_todo/features/tasks/model/task_model.dart';
 import 'package:field_track_todo/features/tasks/service/task_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -11,6 +12,7 @@ class TasksController extends GetxController {
   final isLoading = false.obs;
 
   final TaskService _taskService = Get.put(TaskService());
+  final SyncController _syncController = Get.put(SyncController());
 
   @override
   void onInit() {
@@ -26,7 +28,20 @@ class TasksController extends GetxController {
         final body = response.body;
         if (body != null && body is Map && body['data'] != null) {
           final List rawData = body['data'];
-          final parsed = rawData.map((json) => Task.fromJson(Map<String, dynamic>.from(json))).toList();
+          final parsed = rawData
+              .map((json) => Task.fromJson(Map<String, dynamic>.from(json)))
+              .toList();
+
+          for (var task in parsed) {
+            final pending = _syncController.pendingChanges.firstWhereOrNull(
+              (p) => p.todoId == task.id,
+            );
+            if (pending != null) {
+              task.isCompleted.value = pending.isCompleted;
+              task.updatedAt = pending.updatedAt;
+            }
+          }
+
           tasks.assignAll(parsed);
         }
       } else {
@@ -43,7 +58,27 @@ class TasksController extends GetxController {
     final nextStatus = !task.isCompleted.value;
     final now = DateTime.now();
 
-    EasyLoading.show(status: nextStatus ? 'Completing task...' : 'Reopening task...');
+    if (_syncController.isOffline.value) {
+      task.isCompleted.value = nextStatus;
+      task.updatedAt = now;
+      tasks.refresh();
+
+      _syncController.addPendingChange(
+        todoId: task.id,
+        title: task.title,
+        isCompleted: nextStatus,
+        updatedAt: now,
+      );
+
+      EasyLoading.showSuccess(
+        nextStatus ? 'Task completed offline' : 'Task reopened offline',
+      );
+      return;
+    }
+
+    EasyLoading.show(
+      status: nextStatus ? 'Completing task...' : 'Reopening task...',
+    );
 
     try {
       final response = await _taskService.updateTodo(
@@ -56,13 +91,34 @@ class TasksController extends GetxController {
         task.isCompleted.value = nextStatus;
         task.updatedAt = now;
         tasks.refresh();
-        EasyLoading.showSuccess(nextStatus ? 'Task completed' : 'Task reopened');
+        EasyLoading.showSuccess(
+          nextStatus ? 'Task completed' : 'Task reopened',
+        );
       } else {
-        EasyLoading.showError('Failed to update task.');
+        _saveOfflineFallback(task, nextStatus, now);
       }
     } catch (e) {
-      EasyLoading.showError('An error occurred.');
+      _saveOfflineFallback(task, nextStatus, now);
     }
+  }
+
+  void _saveOfflineFallback(Task task, bool nextStatus, DateTime now) {
+    task.isCompleted.value = nextStatus;
+    task.updatedAt = now;
+    tasks.refresh();
+
+    _syncController.addPendingChange(
+      todoId: task.id,
+      title: task.title,
+      isCompleted: nextStatus,
+      updatedAt: now,
+    );
+
+    _syncController.isOffline.value = true;
+
+    EasyLoading.showSuccess(
+      nextStatus ? 'Task completed offline' : 'Task reopened offline',
+    );
   }
 
   void changeFilter(TaskFilter filter) {
@@ -73,13 +129,15 @@ class TasksController extends GetxController {
     final utcDate = dateTime.toUtc();
     final nowUtc = DateTime.now().toUtc();
     return utcDate.year == nowUtc.year &&
-           utcDate.month == nowUtc.month &&
-           utcDate.day == nowUtc.day;
+        utcDate.month == nowUtc.month &&
+        utcDate.day == nowUtc.day;
   }
 
   int get totalCount => tasks.length;
 
-  int get completedCount => tasks.where((task) => task.isCompleted.value && _isToday(task.updatedAt)).length;
+  int get completedCount => tasks
+      .where((task) => task.isCompleted.value && _isToday(task.updatedAt))
+      .length;
 
   double get progressPercent {
     if (totalCount == 0) return 0.0;

@@ -1,4 +1,5 @@
 import 'package:field_track_todo/core/common/app_color.dart';
+import 'package:field_track_todo/features/sync/controller/sync_controller.dart';
 import 'package:field_track_todo/features/tasks/model/task_model.dart';
 import 'package:field_track_todo/features/tasks/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +18,15 @@ class TaskCard extends StatelessWidget {
 
     return Obx(() {
       final bool completed = task.isCompleted.value;
+      final syncController = Get.find<SyncController>();
+      final bool isPendingSync = syncController.pendingChanges.any(
+        (p) => p.todoId == task.id,
+      );
 
       final Color cardBg = completed
-          ? (isDark ? AppColors.darkCompletedTaskCardBg : AppColors.lightCompletedTaskCardBg)
+          ? (isDark
+                ? AppColors.darkCompletedTaskCardBg
+                : AppColors.lightCompletedTaskCardBg)
           : (isDark ? AppColors.darkFieldBackground : Colors.white);
 
       return Container(
@@ -135,7 +142,36 @@ class TaskCard extends StatelessWidget {
                         ],
                       ),
 
-                      StatusBadge(completed: completed, isDark: isDark, primaryColor: theme.primaryColor),
+                      Row(
+                        children: [
+                          if (isPendingSync) ...[
+                            Icon(
+                              Icons.sync,
+                              size: 14,
+                              color: isDark
+                                  ? AppColors.darkWarningText
+                                  : AppColors.lightWarningText,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Waiting',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.darkWarningText
+                                    : AppColors.lightWarningText,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          StatusBadge(
+                            completed: completed,
+                            isDark: isDark,
+                            primaryColor: theme.primaryColor,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
@@ -148,10 +184,25 @@ class TaskCard extends StatelessWidget {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final month = months[dateTime.month - 1];
     return '$month ${dateTime.day}, $hour:$minute $period';
   }
