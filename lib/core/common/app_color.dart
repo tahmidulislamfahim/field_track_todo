@@ -40,5 +40,14 @@ class AppColors {
   // Common colors
   static const Color lightLogoText = Color(0xFF1E293B);
   static const Color lightLabelText = Color(0xFF4B5563);
+  static const Color lightCheckboxBorder = Color(0xFFD1D5DB);
+  static const Color darkCheckboxBorder = Color(0xFF374151);
+  static const Color successGreen = Color(0xFF10B981);
+  static const Color lightSuccessBg = Color(0xFFE8F8F5);
+  static const Color darkSuccessBg = Color(0xFF0F2D2A);
+  static const Color lightWarningBg = Color(0xFFFEF3C7);
+  static const Color darkWarningBg = Color(0xFF332510);
+  static const Color lightWarningText = Color(0xFFD97706);
+  static const Color darkWarningText = Color(0xFFF59E0B);
   static const Color red = Color(0xFFEF4444);
 }
