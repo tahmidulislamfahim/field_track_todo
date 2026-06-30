@@ -40,11 +40,14 @@ class TaskProgressCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Today's progress",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               Obx(
@@ -60,7 +63,7 @@ class TaskProgressCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-    
+
           Obx(() {
             final double percent = controller.progressPercent;
             return ClipRRect(
@@ -71,9 +74,7 @@ class TaskProgressCard extends StatelessWidget {
                 backgroundColor: isDark
                     ? AppColors.darkBorder
                     : AppColors.lightBorder,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.primaryColor,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
               ),
             );
           }),

@@ -13,7 +13,11 @@ class LocationCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color cardBg = isDark ? AppColors.darkFieldBackground : Colors.white;
+    final Color cardBg = location.isActive
+        ? (isDark ? AppColors.darkFieldBackground : Colors.white)
+        : (isDark
+              ? AppColors.darkInactiveLocationCardBg
+              : AppColors.lightInactiveLocationCardBg);
 
     final Color leadingBg = location.isActive
         ? (isDark

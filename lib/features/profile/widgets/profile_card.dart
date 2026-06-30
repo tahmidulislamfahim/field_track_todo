@@ -62,10 +62,13 @@ class ProfileCard extends StatelessWidget {
           Obx(
             () => Text(
               controller.name.value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -0.5,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
           ),

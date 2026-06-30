@@ -15,10 +15,12 @@ class TaskCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color cardBg = isDark ? AppColors.darkFieldBackground : Colors.white;
-
     return Obx(() {
       final bool completed = task.isCompleted.value;
+
+      final Color cardBg = completed
+          ? (isDark ? AppColors.darkCompletedTaskCardBg : AppColors.lightCompletedTaskCardBg)
+          : (isDark ? AppColors.darkFieldBackground : Colors.white);
 
       return Container(
         margin: const EdgeInsets.only(bottom: 16),
