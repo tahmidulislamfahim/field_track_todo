@@ -10,7 +10,6 @@ class RegistrationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Instantiate RegistrationScreenController
     final controller = Get.put(RegistrationScreenController());
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;

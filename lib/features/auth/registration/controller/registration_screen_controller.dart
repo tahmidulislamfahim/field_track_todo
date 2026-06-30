@@ -1,4 +1,8 @@
+import 'package:field_track_todo/core/local_service/shared_preference_helper.dart';
+import 'package:field_track_todo/features/auth/registration/service/registration_service.dart';
+import 'package:field_track_todo/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class RegistrationScreenController extends GetxController {
@@ -10,6 +14,10 @@ class RegistrationScreenController extends GetxController {
 
   final isPasswordVisible = false.obs;
   final isLoading = false.obs;
+
+  final RegistrationService _registrationService = Get.put(
+    RegistrationService(),
+  );
 
   @override
   void onInit() {
@@ -70,31 +78,41 @@ class RegistrationScreenController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Simulate network request for registration
-      await Future.delayed(const Duration(milliseconds: 1500));
-
-      Get.snackbar(
-        'Success',
-        'Account created successfully!',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.teal.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 16,
+      final response = await _registrationService.registerUser(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      // Navigate back to login
-      Get.back();
+      if (response.status.isOk) {
+        final body = response.body;
+        if (body != null && body is Map) {
+          final accessToken = body['access_token'];
+          final refreshToken = body['refresh_token'];
+
+          if (accessToken != null && refreshToken != null) {
+            await SharedPreferencesHelper.saveAccessToken(accessToken);
+            await SharedPreferencesHelper.saveRefreshToken(refreshToken);
+
+            EasyLoading.showSuccess('Account created successfully!');
+
+            Get.offAllNamed(AppRoutes.navBarScreen);
+          } else {
+            EasyLoading.showError('Invalid response format from server.');
+          }
+        } else {
+          EasyLoading.showError('Invalid response format from server.');
+        }
+      } else {
+        String errorMsg = 'Failed to register account. Please try again.';
+        if (response.body != null && response.body is Map) {
+          errorMsg = response.body['message'] ?? errorMsg;
+        }
+
+        EasyLoading.showError(errorMsg);
+      }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to create account. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 16,
-      );
+      EasyLoading.showError('An unexpected error occurred. Please try again.');
     } finally {
       isLoading.value = false;
     }

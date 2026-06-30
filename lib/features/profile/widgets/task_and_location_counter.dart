@@ -32,9 +32,12 @@ class TaskAndLocationCounter extends StatelessWidget {
                 Obx(
                   () => Text(
                     controller.tasksDoneToday.value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                 ),
@@ -67,9 +70,12 @@ class TaskAndLocationCounter extends StatelessWidget {
                 Obx(
                   () => Text(
                     '${controller.activeLocationsCount.value}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                 ),

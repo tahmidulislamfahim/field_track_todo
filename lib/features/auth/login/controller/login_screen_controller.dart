@@ -1,5 +1,8 @@
+import 'package:field_track_todo/core/local_service/shared_preference_helper.dart';
+import 'package:field_track_todo/features/auth/login/service/login_service.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class LoginScreenController extends GetxController {
@@ -10,6 +13,8 @@ class LoginScreenController extends GetxController {
 
   final isPasswordVisible = false.obs;
   final isLoading = false.obs;
+
+  final LoginService _loginService = Get.put(LoginService());
 
   @override
   void onInit() {
@@ -58,19 +63,40 @@ class LoginScreenController extends GetxController {
     isLoading.value = true;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 1500));
-
-      Get.offAllNamed(AppRoutes.navBarScreen);
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Authentication failed. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 16,
+      final response = await _loginService.loginUser(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
+
+      if (response.status.isOk) {
+        final body = response.body;
+        if (body != null && body is Map) {
+          final accessToken = body['access_token'];
+          final refreshToken = body['refresh_token'];
+
+          if (accessToken != null && refreshToken != null) {
+            await SharedPreferencesHelper.saveAccessToken(accessToken);
+            await SharedPreferencesHelper.saveRefreshToken(refreshToken);
+
+            EasyLoading.showSuccess('Signed in successfully!');
+
+            Get.offAllNamed(AppRoutes.navBarScreen);
+          } else {
+            EasyLoading.showError('Invalid response format from server.');
+          }
+        } else {
+          EasyLoading.showError('Invalid response format from server.');
+        }
+      } else {
+        String errorMsg = 'Authentication failed. Please try again.';
+        if (response.body != null && response.body is Map) {
+          errorMsg = response.body['message'] ?? errorMsg;
+        }
+
+        EasyLoading.showError(errorMsg);
+      }
+    } catch (e) {
+      EasyLoading.showError('An unexpected error occurred. Please try again.');
     } finally {
       isLoading.value = false;
     }
