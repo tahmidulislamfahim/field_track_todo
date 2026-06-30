@@ -5,7 +5,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This application requires access to the device location to set geofenced areas.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This application requires access to the device location to set geofenced areas.</string>
+	<string>This application requires access to the device location to set geofenced areas in the background.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This application requires access to the device location to monitor geofenced areas in the background.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

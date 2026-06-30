@@ -1,3 +1,4 @@
+import 'package:field_track_todo/core/services/geofence_service.dart';
 import 'package:field_track_todo/features/location/model/location_model.dart';
 import 'package:field_track_todo/features/location/service/location_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -28,6 +29,7 @@ class LocationsController extends GetxController {
           final parsed = rawData.map((json) => LocationModel.fromJson(json)).toList();
           locations.assignAll(parsed);
           search(searchQuery.value);
+          GeofenceService().startMonitoring();
         }
       } else {
         EasyLoading.showError('Failed to load locations.');
@@ -59,6 +61,7 @@ class LocationsController extends GetxController {
   void addLocation(LocationModel location) {
     locations.add(location);
     search(searchQuery.value);
+    GeofenceService().startMonitoring();
   }
 
   void toggleLocationStatus(String id) {
@@ -67,6 +70,7 @@ class LocationsController extends GetxController {
       final updated = locations[index].copyWith(isActive: !locations[index].isActive);
       locations[index] = updated;
       search(searchQuery.value);
+      GeofenceService().startMonitoring();
     }
   }
 
@@ -75,11 +79,13 @@ class LocationsController extends GetxController {
     if (index != -1) {
       locations[index] = updated;
       search(searchQuery.value);
+      GeofenceService().startMonitoring();
     }
   }
 
   void deleteLocation(String id) {
     locations.removeWhere((loc) => loc.id == id);
     search(searchQuery.value);
+    GeofenceService().startMonitoring();
   }
 }
