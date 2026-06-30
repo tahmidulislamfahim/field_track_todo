@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:field_track_todo/core/local_service/shared_preference_helper.dart';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
 import 'package:field_track_todo/features/tasks/controller/tasks_controller.dart';
@@ -16,11 +17,28 @@ class ProfileController extends GetxController {
   final activeLocationsCount = 0.obs;
 
   final ProfileService _profileService = Get.put(ProfileService());
+  final List<StreamSubscription> _taskSubs = [];
 
   @override
   void onInit() {
     super.onInit();
     getProfileInfo();
+    
+    // Bind listeners to refresh stats reactively
+    try {
+      final locationsController = Get.find<LocationsController>();
+      ever(locationsController.locations, (_) => _updateStats());
+    } catch (_) {}
+
+    try {
+      final tasksController = Get.find<TasksController>();
+      ever(tasksController.tasks, (_) {
+        _updateStats();
+        _listenToTaskChanges(tasksController);
+      });
+      _listenToTaskChanges(tasksController);
+    } catch (_) {}
+
     _updateStats();
   }
 
@@ -85,6 +103,25 @@ class ProfileController extends GetxController {
       return word[0].toUpperCase() + word.substring(1);
     });
     return capitalized.join(' ');
+  }
+
+  void _listenToTaskChanges(TasksController tasksController) {
+    for (var sub in _taskSubs) {
+      sub.cancel();
+    }
+    _taskSubs.clear();
+
+    for (var task in tasksController.tasks) {
+      _taskSubs.add(task.isCompleted.listen((_) => _updateStats()));
+    }
+  }
+
+  @override
+  void onClose() {
+    for (var sub in _taskSubs) {
+      sub.cancel();
+    }
+    super.onClose();
   }
 
   Future<void> signOut() async {

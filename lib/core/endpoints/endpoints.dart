@@ -7,5 +7,7 @@ class Endpoints {
   static const String logout = '$baseUrl/api/v1/auth/logout';
   static const String refresh = '$baseUrl/api/v1/auth/refresh';
 
-  static const String getAllLocations = '$baseUrl/api/v1/locations';
+  static const String locations = '$baseUrl/api/v1/locations';
+  static String deleteOrEditLocation(String locationId) =>
+      '$baseUrl/api/v1/locations/$locationId';
 }

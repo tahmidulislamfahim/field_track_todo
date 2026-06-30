@@ -3,14 +3,28 @@ import 'package:field_track_todo/core/local_service/shared_preference_helper.dar
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
-class LocationService extends GetConnect {
-  Future<Response> fetchLocations() async {
+class CreateLocationService extends GetConnect {
+  Future<Response> createLocation({
+    required String name,
+    required double latitude,
+    required double longitude,
+    required double radiusM,
+  }) async {
     final String? token = await SharedPreferencesHelper.getAccessToken();
 
-    debugPrint('GET URL: ${Endpoints.locations}');
+    final Map<String, dynamic> body = {
+      'location_name': name,
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius_m': radiusM.toInt(),
+    };
 
-    final response = await get(
+    debugPrint('POST URL: ${Endpoints.locations}');
+    debugPrint('PAYLOAD: $body');
+
+    final response = await post(
       Endpoints.locations,
+      body,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

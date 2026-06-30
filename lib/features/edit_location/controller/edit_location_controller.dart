@@ -1,6 +1,8 @@
+import 'package:field_track_todo/features/edit_location/service/edit_location_service.dart';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
 import 'package:field_track_todo/features/location/model/location_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
@@ -19,6 +21,7 @@ class EditLocationController extends GetxController {
   final longitude = 55.2708.obs;
 
   final MapController mapController = MapController();
+  final EditLocationService _editLocationService = Get.put(EditLocationService());
 
   @override
   void onInit() {
@@ -68,7 +71,7 @@ class EditLocationController extends GetxController {
     isActive.value = value;
   }
 
-  void saveLocation() {
+  Future<void> saveLocation() async {
     final name = nameController.text.trim();
     final lat = double.tryParse(latitudeController.text);
     final lng = double.tryParse(longitudeController.text);
@@ -98,51 +101,57 @@ class EditLocationController extends GetxController {
       return;
     }
 
-    final updatedLoc = originalLocation.copyWith(
-      id: originalLocation.id,
-      locationName: name,
-      latitude: lat,
-      longitude: lng,
-      radiusM: radius.value,
-      isActive: isActive.value,
-    );
+    EasyLoading.show(status: 'Updating location...');
 
     try {
-      final locationsController = Get.find<LocationsController>();
-      locationsController.updateLocation(updatedLoc);
+      final response = await _editLocationService.updateLocation(
+        locationId: originalLocation.id,
+        name: name,
+        latitude: lat,
+        longitude: lng,
+        radiusM: radius.value,
+        isActive: isActive.value,
+      );
 
-      Get.back();
-      Get.snackbar(
-        'Success',
-        'Location updated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      if (response.status.isOk) {
+        final locationsController = Get.find<LocationsController>();
+        await locationsController.getLocations();
+
+        EasyLoading.showSuccess('Location updated successfully');
+        Get.back();
+      } else {
+        String errorMsg = 'Could not update location. Please try again.';
+        if (response.body != null && response.body is Map) {
+          errorMsg = response.body['message'] ?? errorMsg;
+        }
+        EasyLoading.showError(errorMsg);
+      }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not update location.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('An unexpected error occurred.');
     }
   }
 
-  void deleteLocation() {
-    try {
-      final locationsController = Get.find<LocationsController>();
-      locationsController.deleteLocation(originalLocation.id);
+  Future<void> deleteLocation() async {
+    EasyLoading.show(status: 'Deleting location...');
 
-      Get.back();
-      Get.snackbar(
-        'Success',
-        'Location deleted successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    try {
+      final response = await _editLocationService.deleteLocation(originalLocation.id);
+
+      if (response.status.isOk) {
+        final locationsController = Get.find<LocationsController>();
+        await locationsController.getLocations();
+
+        EasyLoading.showSuccess('Location deleted successfully');
+        Get.back();
+      } else {
+        String errorMsg = 'Could not delete location. Please try again.';
+        if (response.body != null && response.body is Map) {
+          errorMsg = response.body['message'] ?? errorMsg;
+        }
+        EasyLoading.showError(errorMsg);
+      }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not delete location.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('An unexpected error occurred.');
     }
   }
 
@@ -156,3 +165,4 @@ class EditLocationController extends GetxController {
     super.onClose();
   }
 }
+

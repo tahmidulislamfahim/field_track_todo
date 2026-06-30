@@ -1,6 +1,7 @@
+import 'package:field_track_todo/features/create_location/service/create_location_service.dart';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
-import 'package:field_track_todo/features/location/model/location_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,21 +12,24 @@ class CreateLocationController extends GetxController {
   final nameController = TextEditingController();
   final latitudeController = TextEditingController();
   final longitudeController = TextEditingController();
-  
+
   final radius = 150.0.obs;
   final isActive = true.obs;
-  
+
   final latitude = 25.2048.obs;
   final longitude = 55.2708.obs;
-  
+
   final MapController mapController = MapController();
+  final CreateLocationService _createLocationService = Get.put(
+    CreateLocationService(),
+  );
 
   @override
   void onInit() {
     super.onInit();
     latitudeController.text = latitude.value.toString();
     longitudeController.text = longitude.value.toString();
-    
+
     latitudeController.addListener(_onLatitudeChanged);
     longitudeController.addListener(_onLongitudeChanged);
   }
@@ -56,14 +60,9 @@ class CreateLocationController extends GetxController {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      Get.snackbar(
-        'Location Services Disabled',
-        'Please enable location services on your device.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Location Services Disabled');
       return;
     }
 
@@ -71,26 +70,17 @@ class CreateLocationController extends GetxController {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        Get.snackbar(
-          'Permission Denied',
-          'Location permissions are denied.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        EasyLoading.showError('Location permissions are denied.');
         return;
       }
     }
-    
+
     if (permission == LocationPermission.deniedForever) {
-      Get.snackbar(
-        'Permission Permanently Denied',
-        'Location permissions are permanently denied, we cannot request permissions.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Location permissions are permanently denied.');
       return;
     }
 
     try {
-      // Get current location coordinates
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -99,47 +89,41 @@ class CreateLocationController extends GetxController {
 
       latitude.value = position.latitude;
       longitude.value = position.longitude;
-      
+
       latitudeController.text = position.latitude.toString();
       longitudeController.text = position.longitude.toString();
       _moveMap();
 
-      // Reverse geocode the coordinates to fetch the actual place/street name
-      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final placemark = placemarks.first;
         final String? street = placemark.street;
         final String? locality = placemark.locality;
         final String? subAdministrativeArea = placemark.subAdministrativeArea;
-        
+
         String name = '';
         if (street != null && street.isNotEmpty) {
           name = street;
         } else if (locality != null && locality.isNotEmpty) {
           name = locality;
-        } else if (subAdministrativeArea != null && subAdministrativeArea.isNotEmpty) {
+        } else if (subAdministrativeArea != null &&
+            subAdministrativeArea.isNotEmpty) {
           name = subAdministrativeArea;
         } else {
           name = 'My Location';
         }
-        
+
         nameController.text = name;
       } else {
         nameController.text = 'My Location';
       }
 
-      Get.snackbar(
-        'Success',
-        'Fetched current device location',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
+      EasyLoading.showSuccess('Fetched current device location');
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to fetch device location: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Failed to fetch device location');
     }
   }
 
@@ -151,44 +135,54 @@ class CreateLocationController extends GetxController {
     isActive.value = value;
   }
 
-  void saveLocation() {
+  Future<void> saveLocation() async {
     final name = nameController.text.trim();
     final lat = double.tryParse(latitudeController.text);
     final lng = double.tryParse(longitudeController.text);
-    
+
     if (name.isEmpty) {
-      Get.snackbar('Error', 'Please enter a location name', snackPosition: SnackPosition.BOTTOM);
+      EasyLoading.showError('Please enter a location name');
       return;
     }
     if (lat == null) {
-      Get.snackbar('Error', 'Please enter a valid latitude', snackPosition: SnackPosition.BOTTOM);
+      EasyLoading.showError('Please enter a valid latitude');
       return;
     }
     if (lng == null) {
-      Get.snackbar('Error', 'Please enter a valid longitude', snackPosition: SnackPosition.BOTTOM);
+      EasyLoading.showError('Please enter a valid longitude');
       return;
     }
 
-    // Create a new location object
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final newLoc = LocationModel(
-      id: id,
-      locationName: name,
-      latitude: lat,
-      longitude: lng,
-      radiusM: radius.value,
-      isActive: isActive.value,
-    );
+    EasyLoading.show(status: 'Saving location...');
 
-    // Save using the LocationsController
     try {
-      final locationsController = Get.find<LocationsController>();
-      locationsController.addLocation(newLoc);
-      
-      Get.back(); // Return to previous screen
-      Get.snackbar('Success', 'Location saved successfully', snackPosition: SnackPosition.BOTTOM);
+      final response = await _createLocationService.createLocation(
+        name: name,
+        latitude: lat,
+        longitude: lng,
+        radiusM: radius.value,
+      );
+
+      if (response.status.isOk) {
+        final body = response.body;
+        if (body != null && body is Map) {
+          final locationsController = Get.find<LocationsController>();
+          await locationsController.getLocations();
+
+          EasyLoading.showSuccess('Location saved successfully');
+          Get.back();
+        } else {
+          EasyLoading.showError('Invalid server response format.');
+        }
+      } else {
+        String errorMsg = 'Could not save location. Please try again.';
+        if (response.body != null && response.body is Map) {
+          errorMsg = response.body['message'] ?? errorMsg;
+        }
+        EasyLoading.showError(errorMsg);
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Could not save location. Make sure you opened the locations list first.', snackPosition: SnackPosition.BOTTOM);
+      EasyLoading.showError('An unexpected error occurred.');
     }
   }
 
