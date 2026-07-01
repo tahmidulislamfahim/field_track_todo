@@ -6,14 +6,14 @@ import 'package:field_track_todo/features/profile/screen/profile_screen.dart';
 import 'package:field_track_todo/features/sync/screen/sync_screen.dart';
 import 'package:field_track_todo/features/tasks/screen/tasks_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NavBarScreen extends StatelessWidget {
+class NavBarScreen extends ConsumerWidget {
   const NavBarScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(NavBarController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(navBarControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -32,9 +32,9 @@ class NavBarScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      body: Obx(
-        () =>
-            IndexedStack(index: controller.currentIndex.value, children: pages),
+      body: IndexedStack(
+        index: controller.currentIndex,
+        children: pages,
       ),
       bottomNavigationBar: SafeArea(
         child: Container(

@@ -1,8 +1,8 @@
 import 'package:field_track_todo/core/endpoints/endpoints.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
-class SplashService extends GetConnect {
+class SplashService extends BaseService {
   Future<Response> checkMe(String token) async {
     debugPrint('GET URL: ${Endpoints.userMe}');
 

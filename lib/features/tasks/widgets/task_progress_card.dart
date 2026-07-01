@@ -1,7 +1,6 @@
 import 'package:field_track_todo/core/common/app_color.dart';
 import 'package:field_track_todo/features/tasks/controller/tasks_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class TaskProgressCard extends StatelessWidget {
   const TaskProgressCard({
@@ -50,34 +49,29 @@ class TaskProgressCard extends StatelessWidget {
                       : AppColors.lightTextPrimary,
                 ),
               ),
-              Obx(
-                () => Text(
-                  controller.progressText,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primaryColor,
-                  ),
+              Text(
+                controller.progressText,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
 
-          Obx(() {
-            final double percent = controller.progressPercent;
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: percent,
-                minHeight: 8,
-                backgroundColor: isDark
-                    ? AppColors.darkBorder
-                    : AppColors.lightBorder,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
-              ),
-            );
-          }),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: controller.progressPercent,
+              minHeight: 8,
+              backgroundColor: isDark
+                  ? AppColors.darkBorder
+                  : AppColors.lightBorder,
+              valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+            ),
+          ),
         ],
       ),
     );

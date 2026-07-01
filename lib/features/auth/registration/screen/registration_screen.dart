@@ -3,14 +3,14 @@ import 'package:field_track_todo/core/widgets/custom_button.dart';
 import 'package:field_track_todo/core/widgets/custom_text_form_field.dart';
 import 'package:field_track_todo/features/auth/registration/controller/registration_screen_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RegistrationScreen extends StatelessWidget {
+class RegistrationScreen extends ConsumerWidget {
   const RegistrationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(RegistrationScreenController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(registrationScreenControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -96,34 +96,30 @@ class RegistrationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  Obx(
-                    () => CustomTextFormField(
-                      controller: controller.passwordController,
-                      labelText: 'Password',
-                      hintText: 'Create a password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      obscureText: !controller.isPasswordVisible.value,
-                      validator: controller.validatePassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          controller.isPasswordVisible.value
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: controller.togglePasswordVisibility,
-                        splashRadius: 20,
+                  CustomTextFormField(
+                    controller: controller.passwordController,
+                    labelText: 'Password',
+                    hintText: 'Create a password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible,
+                    validator: controller.validatePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                       ),
+                      onPressed: controller.togglePasswordVisibility,
+                      splashRadius: 20,
                     ),
                   ),
                   const SizedBox(height: 36),
 
-                  Obx(() {
-                    return CustomButton(
-                      text: 'Create account',
-                      isLoading: controller.isLoading.value,
-                      onPressed: controller.register,
-                    );
-                  }),
+                  CustomButton(
+                    text: 'Create account',
+                    isLoading: controller.isLoading,
+                    onPressed: controller.register,
+                  ),
                   const SizedBox(height: 24),
 
                   Row(
@@ -140,7 +136,7 @@ class RegistrationScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Get.back();
+                          Navigator.pop(context);
                         },
                         child: Text(
                           'Sign in',

@@ -1,41 +1,43 @@
 import 'package:field_track_todo/features/edit_location/service/edit_location_service.dart';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
 import 'package:field_track_todo/features/location/model/location_model.dart';
+import 'package:field_track_todo/core/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
-class EditLocationController extends GetxController {
-  late LocationModel originalLocation;
+final editLocationControllerProvider = ChangeNotifierProvider.autoDispose.family<EditLocationController, LocationModel>((ref, originalLocation) {
+  return EditLocationController(ref, originalLocation);
+});
+
+class EditLocationController extends ChangeNotifier {
+  final Ref ref;
+  final LocationModel originalLocation;
 
   final nameController = TextEditingController();
   final latitudeController = TextEditingController();
   final longitudeController = TextEditingController();
 
-  final radius = 150.0.obs;
-  final isActive = true.obs;
+  double radius = 150.0;
+  bool isActive = true;
 
-  final latitude = 25.2048.obs;
-  final longitude = 55.2708.obs;
+  double latitude = 25.2048;
+  double longitude = 55.2708;
 
   final MapController mapController = MapController();
-  final EditLocationService _editLocationService = Get.put(EditLocationService());
+  final EditLocationService _editLocationService = EditLocationService();
 
-  @override
-  void onInit() {
-    super.onInit();
-    originalLocation = Get.arguments as LocationModel;
-
+  EditLocationController(this.ref, this.originalLocation) {
     nameController.text = originalLocation.name;
     latitudeController.text = originalLocation.latitude.toString();
     longitudeController.text = originalLocation.longitude.toString();
-    radius.value = originalLocation.radius;
-    isActive.value = originalLocation.isActive;
+    radius = originalLocation.radius;
+    isActive = originalLocation.isActive;
 
-    latitude.value = originalLocation.latitude;
-    longitude.value = originalLocation.longitude;
+    latitude = originalLocation.latitude;
+    longitude = originalLocation.longitude;
 
     latitudeController.addListener(_onLatitudeChanged);
     longitudeController.addListener(_onLongitudeChanged);
@@ -43,32 +45,36 @@ class EditLocationController extends GetxController {
 
   void _onLatitudeChanged() {
     final val = double.tryParse(latitudeController.text);
-    if (val != null && val != latitude.value) {
-      latitude.value = val;
+    if (val != null && val != latitude) {
+      latitude = val;
       _moveMap();
+      notifyListeners();
     }
   }
 
   void _onLongitudeChanged() {
     final val = double.tryParse(longitudeController.text);
-    if (val != null && val != longitude.value) {
-      longitude.value = val;
+    if (val != null && val != longitude) {
+      longitude = val;
       _moveMap();
+      notifyListeners();
     }
   }
 
   void _moveMap() {
     try {
-      mapController.move(LatLng(latitude.value, longitude.value), 15.0);
+      mapController.move(LatLng(latitude, longitude), 15.0);
     } catch (_) {}
   }
 
   void updateRadius(double value) {
-    radius.value = value;
+    radius = value;
+    notifyListeners();
   }
 
   void toggleActive(bool value) {
-    isActive.value = value;
+    isActive = value;
+    notifyListeners();
   }
 
   Future<void> saveLocation() async {
@@ -77,27 +83,15 @@ class EditLocationController extends GetxController {
     final lng = double.tryParse(longitudeController.text);
 
     if (name.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter a location name',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Please enter a location name');
       return;
     }
     if (lat == null) {
-      Get.snackbar(
-        'Error',
-        'Please enter a valid latitude',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Please enter a valid latitude');
       return;
     }
     if (lng == null) {
-      Get.snackbar(
-        'Error',
-        'Please enter a valid longitude',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      EasyLoading.showError('Please enter a valid longitude');
       return;
     }
 
@@ -109,16 +103,16 @@ class EditLocationController extends GetxController {
         name: name,
         latitude: lat,
         longitude: lng,
-        radiusM: radius.value,
-        isActive: isActive.value,
+        radiusM: radius,
+        isActive: isActive,
       );
 
       if (response.status.isOk) {
-        final locationsController = Get.find<LocationsController>();
+        final locationsController = ref.read(locationsControllerProvider);
         await locationsController.getLocations();
 
         EasyLoading.showSuccess('Location updated successfully');
-        Get.back();
+        NavigationService.goBack();
       } else {
         String errorMsg = 'Could not update location. Please try again.';
         if (response.body != null && response.body is Map) {
@@ -138,11 +132,11 @@ class EditLocationController extends GetxController {
       final response = await _editLocationService.deleteLocation(originalLocation.id);
 
       if (response.status.isOk) {
-        final locationsController = Get.find<LocationsController>();
+        final locationsController = ref.read(locationsControllerProvider);
         await locationsController.getLocations();
 
         EasyLoading.showSuccess('Location deleted successfully');
-        Get.back();
+        NavigationService.goBack();
       } else {
         String errorMsg = 'Could not delete location. Please try again.';
         if (response.body != null && response.body is Map) {
@@ -156,13 +150,12 @@ class EditLocationController extends GetxController {
   }
 
   @override
-  void onClose() {
+  void dispose() {
     latitudeController.removeListener(_onLatitudeChanged);
     longitudeController.removeListener(_onLongitudeChanged);
     nameController.dispose();
     latitudeController.dispose();
     longitudeController.dispose();
-    super.onClose();
+    super.dispose();
   }
 }
-

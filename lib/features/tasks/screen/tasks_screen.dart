@@ -4,14 +4,14 @@ import 'package:field_track_todo/features/tasks/widgets/task_card.dart';
 import 'package:field_track_todo/features/tasks/widgets/task_filter.dart';
 import 'package:field_track_todo/features/tasks/widgets/task_progress_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TasksScreen extends StatelessWidget {
+class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(TasksController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(tasksControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -53,79 +53,69 @@ class TasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              Obx(() {
-                final active = controller.activeFilter.value;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      TaskFilterChip(
-                        label: 'All',
-                        filter: TaskFilter.all,
-                        activeFilter: active,
-                        onTap: () => controller.changeFilter(TaskFilter.all),
-                        theme: theme,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 10),
-                      TaskFilterChip(
-                        label: 'Pending',
-                        filter: TaskFilter.pending,
-                        activeFilter: active,
-                        onTap: () =>
-                            controller.changeFilter(TaskFilter.pending),
-                        theme: theme,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 10),
-                      TaskFilterChip(
-                        label: 'Completed',
-                        filter: TaskFilter.completed,
-                        activeFilter: active,
-                        onTap: () =>
-                            controller.changeFilter(TaskFilter.completed),
-                        theme: theme,
-                        isDark: isDark,
-                      ),
-                    ],
-                  ),
-                );
-              }),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    TaskFilterChip(
+                      label: 'All',
+                      filter: TaskFilter.all,
+                      activeFilter: controller.activeFilter,
+                      onTap: () => controller.changeFilter(TaskFilter.all),
+                      theme: theme,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(width: 10),
+                    TaskFilterChip(
+                      label: 'Pending',
+                      filter: TaskFilter.pending,
+                      activeFilter: controller.activeFilter,
+                      onTap: () => controller.changeFilter(TaskFilter.pending),
+                      theme: theme,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(width: 10),
+                    TaskFilterChip(
+                      label: 'Completed',
+                      filter: TaskFilter.completed,
+                      activeFilter: controller.activeFilter,
+                      onTap: () => controller.changeFilter(TaskFilter.completed),
+                      theme: theme,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
 
-              Obx(() {
-                final filtered = controller.filteredTasks;
-                if (filtered.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40.0),
-                    child: Center(
-                      child: Text(
-                        'No tasks found',
-                        style: TextStyle(
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
-                        ),
+              if (controller.filteredTasks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40.0),
+                  child: Center(
+                    child: Text(
+                      'No tasks found',
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
                       ),
                     ),
-                  );
-                }
-
-                return ListView.builder(
+                  ),
+                )
+              else
+                ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: filtered.length,
+                  itemCount: controller.filteredTasks.length,
                   itemBuilder: (context, index) {
-                    final task = filtered[index];
+                    final task = controller.filteredTasks[index];
                     return TaskCard(
                       task: task,
-                      onTapCheckbox: () =>
-                          controller.toggleTaskCompletion(task),
+                      onTapCheckbox: () => controller.toggleTaskCompletion(task),
                     );
                   },
-                );
-              }),
+                ),
             ],
           ),
         ),

@@ -1,10 +1,8 @@
-import 'package:get/get.dart';
-
 class Task {
   final String id;
   final String title;
   final String description;
-  final RxBool isCompleted;
+  bool isCompleted;
   final DateTime dueAt;
   final DateTime createdAt;
   DateTime updatedAt;
@@ -13,11 +11,11 @@ class Task {
     required this.id,
     required this.title,
     required this.description,
-    required bool isCompleted,
+    required this.isCompleted,
     required this.dueAt,
     required this.createdAt,
     required this.updatedAt,
-  }) : isCompleted = isCompleted.obs;
+  });
 
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
@@ -36,7 +34,7 @@ class Task {
       'id': id,
       'title': title,
       'description': description,
-      'is_completed': isCompleted.value,
+      'is_completed': isCompleted,
       'due_at': dueAt.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),

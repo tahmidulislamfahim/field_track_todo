@@ -7,14 +7,14 @@ import 'package:field_track_todo/features/create_location/widgets/lat_section.da
 import 'package:field_track_todo/features/create_location/widgets/location_name.dart';
 import 'package:field_track_todo/features/create_location/widgets/map_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CreateLocationScreen extends StatelessWidget {
+class CreateLocationScreen extends ConsumerWidget {
   const CreateLocationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(CreateLocationController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(createLocationControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -47,7 +47,7 @@ class CreateLocationScreen extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () => Get.back(),
+                    onTap: () => Navigator.pop(context),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       width: 44,
@@ -148,40 +148,36 @@ class CreateLocationScreen extends StatelessWidget {
                           : AppColors.lightTextPrimary,
                     ),
                   ),
-                  Obx(
-                    () => Text(
-                      '${controller.radius.toInt()} m',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
-                      ),
+                  Text(
+                    '${controller.radius.toInt()} m',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: theme.primaryColor,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Obx(
-                () => SliderTheme(
-                  data: SliderThemeData(
-                    trackHeight: 4,
-                    activeTrackColor: theme.primaryColor,
-                    inactiveTrackColor: sliderInactiveColor,
-                    thumbColor: theme.primaryColor,
-                    overlayColor: theme.primaryColor.withValues(alpha: 0.1),
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 8,
-                    ),
-                    overlayShape: const RoundSliderOverlayShape(
-                      overlayRadius: 16,
-                    ),
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 4,
+                  activeTrackColor: theme.primaryColor,
+                  inactiveTrackColor: sliderInactiveColor,
+                  thumbColor: theme.primaryColor,
+                  overlayColor: theme.primaryColor.withValues(alpha: 0.1),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 8,
                   ),
-                  child: Slider(
-                    min: 50.0,
-                    max: 1000.0,
-                    value: controller.radius,
-                    onChanged: controller.updateRadius,
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 16,
                   ),
+                ),
+                child: Slider(
+                  min: 50.0,
+                  max: 1000.0,
+                  value: controller.radius,
+                  onChanged: controller.updateRadius,
                 ),
               ),
               const SizedBox(height: 20),
@@ -209,13 +205,11 @@ class CreateLocationScreen extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  Obx(
-                    () => Switch.adaptive(
-                      value: controller.isActive.value,
-                      onChanged: controller.toggleActive,
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: theme.primaryColor,
-                    ),
+                  Switch.adaptive(
+                    value: controller.isActive,
+                    onChanged: controller.toggleActive,
+                    activeThumbColor: Colors.white,
+                    activeTrackColor: theme.primaryColor,
                   ),
                 ],
               ),

@@ -1,42 +1,42 @@
 import 'package:field_track_todo/core/services/shared_preference_helper.dart';
 import 'package:field_track_todo/features/auth/registration/service/registration_service.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
+import 'package:field_track_todo/core/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RegistrationScreenController extends GetxController {
+final registrationScreenControllerProvider = ChangeNotifierProvider.autoDispose((ref) => RegistrationScreenController());
+
+class RegistrationScreenController extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
 
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
 
-  final isPasswordVisible = false.obs;
-  final isLoading = false.obs;
+  bool isPasswordVisible = false;
+  bool isLoading = false;
 
-  final RegistrationService _registrationService = Get.put(
-    RegistrationService(),
-  );
+  final RegistrationService _registrationService = RegistrationService();
 
-  @override
-  void onInit() {
-    super.onInit();
+  RegistrationScreenController() {
     nameController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
   }
 
   @override
-  void onClose() {
+  void dispose() {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
-    super.onClose();
+    super.dispose();
   }
 
   void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
+    isPasswordVisible = !isPasswordVisible;
+    notifyListeners();
   }
 
   String? validateName(String? value) {
@@ -75,7 +75,8 @@ class RegistrationScreenController extends GetxController {
       return;
     }
 
-    isLoading.value = true;
+    isLoading = true;
+    notifyListeners();
 
     try {
       final response = await _registrationService.registerUser(
@@ -96,7 +97,7 @@ class RegistrationScreenController extends GetxController {
 
             EasyLoading.showSuccess('Account created successfully!');
 
-            Get.offAllNamed(AppRoutes.navBarScreen);
+            NavigationService.clearStackAndShow(AppRoutes.navBarScreen);
           } else {
             EasyLoading.showError('Invalid response format from server.');
           }
@@ -114,7 +115,8 @@ class RegistrationScreenController extends GetxController {
     } catch (e) {
       EasyLoading.showError('An unexpected error occurred. Please try again.');
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

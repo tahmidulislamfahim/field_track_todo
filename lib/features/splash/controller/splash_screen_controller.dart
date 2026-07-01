@@ -1,16 +1,17 @@
 import 'package:field_track_todo/core/services/shared_preference_helper.dart';
 import 'package:field_track_todo/features/splash/service/splash_service.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
+import 'package:field_track_todo/core/services/navigation_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
-class SplashScreenController extends GetxController {
-  final SplashService _splashService = Get.put(SplashService());
+final splashScreenControllerProvider = Provider((ref) => SplashScreenController());
 
-  @override
-  void onInit() {
-    super.onInit();
+class SplashScreenController {
+  final SplashService _splashService = SplashService();
+
+  SplashScreenController() {
     navigationtoOnboarding();
   }
 
@@ -31,7 +32,7 @@ class SplashScreenController extends GetxController {
           final response = await _splashService.checkMe(accessToken);
 
           if (response.status.isOk) {
-            Get.offAllNamed(AppRoutes.navBarScreen);
+            NavigationService.clearStackAndShow(AppRoutes.navBarScreen);
           } else {
             debugPrint('AccessToken invalid or expired, trying refresh...');
             final refreshResponse = await _splashService.refreshAuthToken(
@@ -48,23 +49,23 @@ class SplashScreenController extends GetxController {
                   await SharedPreferencesHelper.saveAccessToken(newAccess);
                   await SharedPreferencesHelper.saveRefreshToken(newRefresh);
 
-                  Get.offAllNamed(AppRoutes.navBarScreen);
+                  NavigationService.clearStackAndShow(AppRoutes.navBarScreen);
                   return;
                 }
               }
             }
 
             await SharedPreferencesHelper.clearAll();
-            Get.offAllNamed(AppRoutes.login);
+            NavigationService.clearStackAndShow(AppRoutes.login);
           }
         } catch (e) {
           debugPrint('Error fetching profile on splash onboarding check: $e');
           await SharedPreferencesHelper.clearAll();
-          Get.offAllNamed(AppRoutes.login);
+          NavigationService.clearStackAndShow(AppRoutes.login);
         }
       } else {
         await SharedPreferencesHelper.clearAll();
-        Get.offAllNamed(AppRoutes.login);
+        NavigationService.clearStackAndShow(AppRoutes.login);
       }
     });
   }

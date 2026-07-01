@@ -1,8 +1,8 @@
 import 'package:field_track_todo/core/endpoints/endpoints.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
-class RegistrationService extends GetConnect {
+class RegistrationService extends BaseService {
   Future<Response> registerUser({
     required String name,
     required String email,

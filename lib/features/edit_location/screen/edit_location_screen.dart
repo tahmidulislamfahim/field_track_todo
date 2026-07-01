@@ -1,20 +1,22 @@
 import 'package:field_track_todo/core/common/app_color.dart';
 import 'package:field_track_todo/core/widgets/custom_button.dart';
 import 'package:field_track_todo/core/widgets/custom_button_2.dart';
+import 'package:field_track_todo/features/location/model/location_model.dart';
 import 'package:field_track_todo/features/edit_location/controller/edit_location_controller.dart';
 import 'package:field_track_todo/features/edit_location/widgets/edit_latitude.dart';
 import 'package:field_track_todo/features/edit_location/widgets/edit_longitude.dart';
 import 'package:field_track_todo/features/edit_location/widgets/edit_location_name.dart';
 import 'package:field_track_todo/features/edit_location/widgets/edit_map_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EditLocationScreen extends StatelessWidget {
+class EditLocationScreen extends ConsumerWidget {
   const EditLocationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(EditLocationController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final originalLocation = ModalRoute.of(context)!.settings.arguments as LocationModel;
+    final controller = ref.watch(editLocationControllerProvider(originalLocation));
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -47,7 +49,7 @@ class EditLocationScreen extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () => Get.back(),
+                    onTap: () => Navigator.pop(context),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       width: 44,
@@ -140,40 +142,36 @@ class EditLocationScreen extends StatelessWidget {
                           : AppColors.lightTextPrimary,
                     ),
                   ),
-                  Obx(
-                    () => Text(
-                      '${controller.radius.value.toInt()} m',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
-                      ),
+                  Text(
+                    '${controller.radius.toInt()} m',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: theme.primaryColor,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Obx(
-                () => SliderTheme(
-                  data: SliderThemeData(
-                    trackHeight: 4,
-                    activeTrackColor: theme.primaryColor,
-                    inactiveTrackColor: sliderInactiveColor,
-                    thumbColor: theme.primaryColor,
-                    overlayColor: theme.primaryColor.withValues(alpha: 0.1),
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 8,
-                    ),
-                    overlayShape: const RoundSliderOverlayShape(
-                      overlayRadius: 16,
-                    ),
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 4,
+                  activeTrackColor: theme.primaryColor,
+                  inactiveTrackColor: sliderInactiveColor,
+                  thumbColor: theme.primaryColor,
+                  overlayColor: theme.primaryColor.withValues(alpha: 0.1),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 8,
                   ),
-                  child: Slider(
-                    min: 50.0,
-                    max: 1000.0,
-                    value: controller.radius.value,
-                    onChanged: controller.updateRadius,
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 16,
                   ),
+                ),
+                child: Slider(
+                  min: 50.0,
+                  max: 1000.0,
+                  value: controller.radius,
+                  onChanged: controller.updateRadius,
                 ),
               ),
               const SizedBox(height: 20),
@@ -201,13 +199,11 @@ class EditLocationScreen extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  Obx(
-                    () => Switch.adaptive(
-                      value: controller.isActive.value,
-                      onChanged: controller.toggleActive,
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: theme.primaryColor,
-                    ),
+                  Switch.adaptive(
+                    value: controller.isActive,
+                    onChanged: controller.toggleActive,
+                    activeThumbColor: Colors.white,
+                    activeTrackColor: theme.primaryColor,
                   ),
                 ],
               ),

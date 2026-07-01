@@ -1,40 +1,32 @@
 import 'package:field_track_todo/features/create_location/service/create_location_service.dart';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
+import 'package:field_track_todo/core/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-class CreateLocationController extends GetxController {
+final createLocationControllerProvider = ChangeNotifierProvider.autoDispose((ref) => CreateLocationController(ref));
+
+class CreateLocationController extends ChangeNotifier {
+  final Ref ref;
+
   final nameController = TextEditingController();
   final latitudeController = TextEditingController();
   final longitudeController = TextEditingController();
 
-  final _radius = 150.0.obs;
-  double get radius => _radius.value;
-  set radius(double val) => _radius.value = val;
-
-  final isActive = true.obs;
-
-  final _latitude = 0.0.obs;
-  double get latitude => _latitude.value;
-  set latitude(double val) => _latitude.value = val;
-
-  final _longitude = 0.0.obs;
-  double get longitude => _longitude.value;
-  set longitude(double val) => _longitude.value = val;
+  double radius = 150.0;
+  bool isActive = true;
+  double latitude = 0.0;
+  double longitude = 0.0;
 
   final MapController mapController = MapController();
-  final CreateLocationService _createLocationService = Get.put(
-    CreateLocationService(),
-  );
+  final CreateLocationService _createLocationService = CreateLocationService();
 
-  @override
-  void onInit() {
-    super.onInit();
+  CreateLocationController(this.ref) {
     latitudeController.text = latitude == 0.0 ? '' : latitude.toString();
     longitudeController.text = longitude == 0.0 ? '' : longitude.toString();
 
@@ -44,11 +36,22 @@ class CreateLocationController extends GetxController {
     useCurrentLocation();
   }
 
+  @override
+  void dispose() {
+    latitudeController.removeListener(_onLatitudeChanged);
+    longitudeController.removeListener(_onLongitudeChanged);
+    nameController.dispose();
+    latitudeController.dispose();
+    longitudeController.dispose();
+    super.dispose();
+  }
+
   void _onLatitudeChanged() {
     final val = double.tryParse(latitudeController.text);
     if (val != null && val != latitude) {
       latitude = val;
       _moveMap();
+      notifyListeners();
     }
   }
 
@@ -57,6 +60,7 @@ class CreateLocationController extends GetxController {
     if (val != null && val != longitude) {
       longitude = val;
       _moveMap();
+      notifyListeners();
     }
   }
 
@@ -132,6 +136,7 @@ class CreateLocationController extends GetxController {
       }
 
       EasyLoading.showSuccess('Fetched current device location');
+      notifyListeners();
     } catch (e) {
       EasyLoading.showError('Failed to fetch device location');
     }
@@ -139,10 +144,12 @@ class CreateLocationController extends GetxController {
 
   void updateRadius(double value) {
     radius = value;
+    notifyListeners();
   }
 
   void toggleActive(bool value) {
-    isActive.value = value;
+    isActive = value;
+    notifyListeners();
   }
 
   Future<void> saveLocation() async {
@@ -176,11 +183,11 @@ class CreateLocationController extends GetxController {
       if (response.status.isOk) {
         final body = response.body;
         if (body != null && body is Map) {
-          final locationsController = Get.find<LocationsController>();
+          final locationsController = ref.read(locationsControllerProvider);
           await locationsController.getLocations();
 
           EasyLoading.showSuccess('Location saved successfully');
-          Get.back();
+          NavigationService.goBack();
         } else {
           EasyLoading.showError('Invalid server response format.');
         }
@@ -194,15 +201,5 @@ class CreateLocationController extends GetxController {
     } catch (e) {
       EasyLoading.showError('An unexpected error occurred.');
     }
-  }
-
-  @override
-  void onClose() {
-    latitudeController.removeListener(_onLatitudeChanged);
-    longitudeController.removeListener(_onLongitudeChanged);
-    nameController.dispose();
-    latitudeController.dispose();
-    longitudeController.dispose();
-    super.onClose();
   }
 }

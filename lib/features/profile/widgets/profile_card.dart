@@ -1,7 +1,6 @@
 import 'package:field_track_todo/core/common/app_color.dart';
 import 'package:field_track_todo/features/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
@@ -44,45 +43,39 @@ class ProfileCard extends StatelessWidget {
             height: 96,
             decoration: BoxDecoration(color: avatarBg, shape: BoxShape.circle),
             child: Center(
-              child: Obx(
-                () => Text(
-                  controller.initials.value,
-                  style: TextStyle(
-                    color: theme.primaryColor,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Inter',
-                  ),
+              child: Text(
+                controller.initials,
+                style: TextStyle(
+                  color: theme.primaryColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
                 ),
               ),
             ),
           ),
           const SizedBox(height: 16),
 
-          Obx(
-            () => Text(
-              controller.name.value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
+          Text(
+            controller.name,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 4),
 
-          Obx(
-            () => Text(
-              controller.email.value,
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-              ),
+          Text(
+            controller.email,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -106,14 +99,12 @@ class ProfileCard extends StatelessWidget {
                   color: theme.primaryColor,
                 ),
                 const SizedBox(width: 6),
-                Obx(
-                  () => Text(
-                    controller.role.value,
-                    style: TextStyle(
-                      color: theme.primaryColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  controller.role,
+                  style: TextStyle(
+                    color: theme.primaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],

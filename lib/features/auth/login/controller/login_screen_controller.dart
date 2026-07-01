@@ -1,37 +1,41 @@
 import 'package:field_track_todo/core/services/shared_preference_helper.dart';
 import 'package:field_track_todo/features/auth/login/service/login_service.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
+import 'package:field_track_todo/core/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginScreenController extends GetxController {
+final loginScreenControllerProvider = ChangeNotifierProvider.autoDispose(
+  (ref) => LoginScreenController(),
+);
+
+class LoginScreenController extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
 
   late TextEditingController emailController;
   late TextEditingController passwordController;
 
-  final isPasswordVisible = false.obs;
-  final isLoading = false.obs;
+  bool isPasswordVisible = false;
+  bool isLoading = false;
 
-  final LoginService _loginService = Get.put(LoginService());
+  final LoginService _loginService = LoginService();
 
-  @override
-  void onInit() {
-    super.onInit();
+  LoginScreenController() {
     emailController = TextEditingController();
     passwordController = TextEditingController();
   }
 
   @override
-  void onClose() {
+  void dispose() {
     emailController.dispose();
     passwordController.dispose();
-    super.onClose();
+    super.dispose();
   }
 
   void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
+    isPasswordVisible = !isPasswordVisible;
+    notifyListeners();
   }
 
   String? validateEmail(String? value) {
@@ -60,7 +64,8 @@ class LoginScreenController extends GetxController {
       return;
     }
 
-    isLoading.value = true;
+    isLoading = true;
+    notifyListeners();
 
     try {
       final response = await _loginService.loginUser(
@@ -80,7 +85,7 @@ class LoginScreenController extends GetxController {
 
             EasyLoading.showSuccess('Signed in successfully!');
 
-            Get.offAllNamed(AppRoutes.navBarScreen);
+            NavigationService.clearStackAndShow(AppRoutes.navBarScreen);
           } else {
             EasyLoading.showError('Invalid response format from server.');
           }
@@ -98,7 +103,8 @@ class LoginScreenController extends GetxController {
     } catch (e) {
       EasyLoading.showError('An unexpected error occurred. Please try again.');
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

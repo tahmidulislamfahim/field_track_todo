@@ -1,7 +1,6 @@
 import 'package:field_track_todo/core/common/app_color.dart';
 import 'package:field_track_todo/features/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class TaskAndLocationCounter extends StatelessWidget {
   const TaskAndLocationCounter({
@@ -29,16 +28,14 @@ class TaskAndLocationCounter extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Obx(
-                  () => Text(
-                    controller.tasksDoneToday.value,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.lightTextPrimary,
-                    ),
+                Text(
+                  controller.tasksDoneToday,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -67,16 +64,14 @@ class TaskAndLocationCounter extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Obx(
-                  () => Text(
-                    '${controller.activeLocationsCount.value}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.lightTextPrimary,
-                    ),
+                Text(
+                  '${controller.activeLocationsCount}',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),

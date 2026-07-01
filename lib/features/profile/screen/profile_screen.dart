@@ -5,14 +5,14 @@ import 'package:field_track_todo/features/profile/widgets/menu_item.dart';
 import 'package:field_track_todo/features/profile/widgets/profile_card.dart';
 import 'package:field_track_todo/features/profile/widgets/task_and_location_counter.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(ProfileController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(profileControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 

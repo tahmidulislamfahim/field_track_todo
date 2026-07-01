@@ -4,14 +4,14 @@ import 'package:field_track_todo/core/widgets/custom_text_form_field.dart';
 import 'package:field_track_todo/features/auth/login/controller/login_screen_controller.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(LoginScreenController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(loginScreenControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -111,23 +111,21 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  Obx(
-                    () => CustomTextFormField(
-                      controller: controller.passwordController,
-                      labelText: 'Password',
-                      hintText: '••••••••',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      obscureText: !controller.isPasswordVisible.value,
-                      validator: controller.validatePassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          controller.isPasswordVisible.value
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: controller.togglePasswordVisibility,
-                        splashRadius: 20,
+                  CustomTextFormField(
+                    controller: controller.passwordController,
+                    labelText: 'Password',
+                    hintText: '••••••••',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible,
+                    validator: controller.validatePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                       ),
+                      onPressed: controller.togglePasswordVisibility,
+                      splashRadius: 20,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -136,14 +134,13 @@ class LoginScreen extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        Get.snackbar(
-                          'Forgot Password',
-                          'Password reset link will be sent to your email.',
-                          snackPosition: SnackPosition.TOP,
-                          backgroundColor: theme.primaryColor.withValues(
-                            alpha: 0.9,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              'Password reset link will be sent to your email.',
+                            ),
+                            backgroundColor: theme.primaryColor,
                           ),
-                          colorText: isDark ? Colors.black : Colors.white,
                         );
                       },
                       style: TextButton.styleFrom(
@@ -157,13 +154,11 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
 
-                  Obx(() {
-                    return CustomButton(
-                      text: 'Sign in',
-                      isLoading: controller.isLoading.value,
-                      onPressed: controller.signIn,
-                    );
-                  }),
+                  CustomButton(
+                    text: 'Sign in',
+                    isLoading: controller.isLoading,
+                    onPressed: controller.signIn,
+                  ),
                   const SizedBox(height: 24),
 
                   Row(
@@ -180,7 +175,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Get.toNamed(AppRoutes.signup);
+                          Navigator.pushNamed(context, AppRoutes.signup);
                         },
                         child: Text(
                           'Register',

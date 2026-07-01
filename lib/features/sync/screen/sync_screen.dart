@@ -5,14 +5,14 @@ import 'package:field_track_todo/features/sync/widgets/pending_sync_count.dart';
 import 'package:field_track_todo/features/sync/widgets/sync_item_card.dart';
 import 'package:field_track_todo/features/sync/widgets/sync_now_button.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SyncScreen extends StatelessWidget {
+class SyncScreen extends ConsumerWidget {
   const SyncScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(SyncController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(syncControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -27,6 +27,8 @@ class SyncScreen extends StatelessWidget {
     final Color syncIconBg = isDark
         ? AppColors.darkSyncCircleBg
         : AppColors.lightSyncCircleBg;
+
+    final list = controller.pendingChanges;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -61,13 +63,8 @@ class SyncScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              Obx(() {
-                final list = controller.pendingChanges;
-                if (list.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-
-                return Column(
+              if (list.isNotEmpty)
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -93,8 +90,7 @@ class SyncScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                   ],
-                );
-              }),
+                ),
 
               SyncNowButton(
                 controller: controller,

@@ -1,47 +1,51 @@
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:collection/collection.dart';
 import 'package:field_track_todo/features/sync/model/sync_item_model.dart';
 import 'package:field_track_todo/features/sync/service/sync_service.dart';
 import 'package:field_track_todo/features/tasks/controller/tasks_controller.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SyncController extends GetxController {
-  final isOffline = false.obs;
-  final lastSyncedTime = 'never'.obs;
-  final isLoading = false.obs;
+final syncControllerProvider = ChangeNotifierProvider.autoDispose((ref) => SyncController(ref));
 
-  final pendingChanges = <SyncItem>[].obs;
+class SyncController extends ChangeNotifier {
+  final Ref ref;
+
+  bool isOffline = false;
+  String lastSyncedTime = 'never';
+  bool isLoading = false;
+  List<SyncItem> pendingChanges = [];
 
   bool _isSyncing = false;
 
-  final SyncService _syncService = Get.put(SyncService());
+  final SyncService _syncService = SyncService();
   static const String _storageKey = 'pending_todo_sync_changes';
   static const String _lastSyncTimeKey = 'last_todo_sync_time';
 
-  @override
-  void onInit() {
-    super.onInit();
+  SyncController(this.ref) {
     _loadPendingChanges();
     _initConnectivityListener();
   }
 
   Future<void> _loadPendingChanges() async {
     final prefs = await SharedPreferences.getInstance();
-    lastSyncedTime.value = prefs.getString(_lastSyncTimeKey) ?? 'never';
+    lastSyncedTime = prefs.getString(_lastSyncTimeKey) ?? 'never';
 
     final savedData = prefs.getString(_storageKey);
     if (savedData != null) {
       try {
         final List decoded = jsonDecode(savedData);
         final list = decoded.map((item) => SyncItem.fromJson(item)).toList();
-        pendingChanges.assignAll(list);
+        pendingChanges = list;
       } catch (e) {
         debugPrint('Error loading pending changes: $e');
       }
     }
+    notifyListeners();
   }
 
   Future<void> _savePendingChangesToStorage() async {
@@ -54,7 +58,8 @@ class SyncController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
     final formattedTime = _formatTime(now);
-    lastSyncedTime.value = formattedTime;
+    lastSyncedTime = formattedTime;
+    notifyListeners();
     await prefs.setString(_lastSyncTimeKey, formattedTime);
   }
 
@@ -81,10 +86,11 @@ class SyncController extends GetxController {
 
   void _updateConnectivityStatus(List<ConnectivityResult> results) {
     final hasConn = results.any((r) => r != ConnectivityResult.none);
-    final previouslyOffline = isOffline.value;
-    isOffline.value = !hasConn;
+    final previouslyOffline = isOffline;
+    isOffline = !hasConn;
+    notifyListeners();
 
-    if (previouslyOffline && !isOffline.value && pendingChanges.isNotEmpty) {
+    if (previouslyOffline && !isOffline && pendingChanges.isNotEmpty) {
       debugPrint('Internet connection restored. Triggering auto-sync...');
       syncNow();
     }
@@ -111,6 +117,7 @@ class SyncController extends GetxController {
     } else {
       pendingChanges.add(newItem);
     }
+    notifyListeners();
     _savePendingChangesToStorage();
   }
 
@@ -142,7 +149,7 @@ class SyncController extends GetxController {
 
   Future<void> syncNow() async {
     if (pendingChanges.isEmpty) return;
-    if (isOffline.value) {
+    if (isOffline) {
       EasyLoading.showError('Cannot sync changes while offline.');
       return;
     }
@@ -152,7 +159,8 @@ class SyncController extends GetxController {
     }
 
     _isSyncing = true;
-    isLoading.value = true;
+    isLoading = true;
+    notifyListeners();
 
     try {
       final changesPayload = pendingChanges
@@ -198,9 +206,7 @@ class SyncController extends GetxController {
         await _savePendingChangesToStorage();
         await _saveLastSyncTime();
 
-        if (Get.isRegistered<TasksController>()) {
-          Get.find<TasksController>().getTodos();
-        }
+        ref.read(tasksControllerProvider).getTodos();
 
         if (errorMessages.isNotEmpty) {
           final String errorText =
@@ -233,7 +239,8 @@ class SyncController extends GetxController {
       );
     } finally {
       _isSyncing = false;
-      isLoading.value = false;
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

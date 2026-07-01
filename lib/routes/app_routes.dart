@@ -4,22 +4,22 @@ import 'package:field_track_todo/features/create_location/screen/create_location
 import 'package:field_track_todo/features/edit_location/screen/edit_location_screen.dart';
 import 'package:field_track_todo/features/nav_bar/screen/nav_bar_screen.dart';
 import 'package:field_track_todo/features/splash/screen/splash_screen.dart';
-import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 
 class AppRoutes {
-  static String splashScreen = '/splash_screen';
-  static String navBarScreen = '/nav_bar_screen';
-  static String login = '/login';
-  static String signup = '/signup';
-  static String createLocationScreen = '/create_location';
-  static String editLocationScreen = '/edit_location';
+  static const String splashScreen = '/splash_screen';
+  static const String navBarScreen = '/nav_bar_screen';
+  static const String login = '/login';
+  static const String signup = '/signup';
+  static const String createLocationScreen = '/create_location';
+  static const String editLocationScreen = '/edit_location';
 
-  static List<GetPage> routes = [
-    GetPage(name: splashScreen, page: () => SplashScreen()),
-    GetPage(name: login, page: () => LoginScreen()),
-    GetPage(name: signup, page: () => RegistrationScreen()),
-    GetPage(name: navBarScreen, page: () => NavBarScreen()),
-    GetPage(name: createLocationScreen, page: () => CreateLocationScreen()),
-    GetPage(name: editLocationScreen, page: () => EditLocationScreen()),
-  ];
+  static Map<String, WidgetBuilder> get routes => {
+    splashScreen: (context) => const SplashScreen(),
+    login: (context) => const LoginScreen(),
+    signup: (context) => const RegistrationScreen(),
+    navBarScreen: (context) => const NavBarScreen(),
+    createLocationScreen: (context) => const CreateLocationScreen(),
+    editLocationScreen: (context) => const EditLocationScreen(),
+  };
 }

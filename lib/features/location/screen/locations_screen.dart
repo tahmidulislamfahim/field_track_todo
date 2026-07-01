@@ -4,14 +4,14 @@ import 'package:field_track_todo/features/location/widgets/location_card.dart';
 import 'package:field_track_todo/features/location/widgets/search_location.dart';
 import 'package:field_track_todo/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LocationsScreen extends StatelessWidget {
+class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(LocationsController());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(locationsControllerProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -36,7 +36,7 @@ class LocationsScreen extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () {
-                      Get.toNamed(AppRoutes.createLocationScreen);
+                      Navigator.pushNamed(context, AppRoutes.createLocationScreen);
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
@@ -62,24 +62,22 @@ class LocationsScreen extends StatelessWidget {
               SearchLocation(isDark: isDark, controller: controller),
               const SizedBox(height: 24),
 
-              Obx(() {
-                if (controller.filteredLocations.isEmpty) {
-                  return SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Text(
-                        'No locations found',
-                        style: TextStyle(
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
-                        ),
+              if (controller.filteredLocations.isEmpty)
+                SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text(
+                      'No locations found',
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
                       ),
                     ),
-                  );
-                }
-
-                return ListView.builder(
+                  ),
+                )
+              else
+                ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.filteredLocations.length,
@@ -87,20 +85,20 @@ class LocationsScreen extends StatelessWidget {
                     final location = controller.filteredLocations[index];
                     return LocationCard(
                       location: location,
-                      onTap: () => Get.toNamed(
+                      onTap: () => Navigator.pushNamed(
+                        context,
                         AppRoutes.editLocationScreen,
                         arguments: location,
                       ),
                     );
                   },
-                );
-              }),
+                ),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.createLocationScreen),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.createLocationScreen),
         backgroundColor: isDark
             ? AppColors.darkPrimary
             : AppColors.lightPrimary,

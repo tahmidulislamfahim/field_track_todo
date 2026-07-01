@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:field_track_todo/features/location/controller/locations_controller.dart';
 import 'package:field_track_todo/features/location/model/location_model.dart';
 import 'package:field_track_todo/core/services/notification_service.dart';
+import 'package:field_track_todo/core/services/provider_locator.dart';
+import 'package:field_track_todo/core/services/shared_preference_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 
 class GeofenceService {
   static final GeofenceService _instance = GeofenceService._internal();
@@ -84,9 +85,16 @@ class GeofenceService {
     }
   }
 
-  void _checkGeofences(Position position) {
+  Future<void> _checkGeofences(Position position) async {
     try {
-      final locationsController = Get.find<LocationsController>();
+      final token = await SharedPreferencesHelper.getAccessToken();
+      if (token == null || token.isEmpty) {
+        debugPrint('GeofenceService: No access token found. Stopping monitoring.');
+        await stopMonitoring();
+        return;
+      }
+
+      final locationsController = ProviderContainerLocator.container.read(locationsControllerProvider);
       final activeLocations = locationsController.locations.where((loc) => loc.isActive).toList();
 
       for (final LocationModel loc in activeLocations) {

@@ -1,8 +1,8 @@
 import 'package:field_track_todo/core/endpoints/endpoints.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
-class LoginService extends GetConnect {
+class LoginService extends BaseService {
   Future<Response> loginUser({
     required String email,
     required String password,

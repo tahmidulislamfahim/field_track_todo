@@ -1,9 +1,9 @@
 import 'package:field_track_todo/core/endpoints/endpoints.dart';
 import 'package:field_track_todo/core/services/shared_preference_helper.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
-class EditLocationService extends GetConnect {
+class EditLocationService extends BaseService {
   Future<Response> deleteLocation(String locationId) async {
     final String? token = await SharedPreferencesHelper.getAccessToken();
     final url = Endpoints.deleteOrEditLocation(locationId);

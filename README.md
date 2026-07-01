@@ -4,14 +4,14 @@ FieldTrack is a modern Flutter-based mobile application designed for field track
 
 ---
 
-## 📱 Demo & Download
+##  Demo & Download
 
-*   🎥 **Demo Video:** [Watch the Demo Video](https://your-demo-video-link-here.com)
-*   📥 **APK Download:** [Download Android APK](https://drive.google.com/file/d/100KcFCFCufET1Hv8wuXYlWREHPQbTRv-/view?usp=sharing)
+*    **Demo Video:** [Watch the Demo Video](https://drive.google.com/file/d/1A062zhDondzwmW9_bBL6wGu6sWd7fQHu/view?usp=sharing)
+*    **APK Download:** [Download Android APK](https://drive.google.com/file/d/100KcFCFCufET1Hv8wuXYlWREHPQbTRv-/view?usp=sharing)
 
 ---
 
-## 🛠️ Project Setup Steps
+##  Project Setup Steps
 
 To set up the project on your local machine, follow these steps:
 
@@ -63,7 +63,7 @@ To set up the project on your local machine, follow these steps:
 
 ---
 
-## 🚀 How to Run the App
+##  How to Run the App
 
 1.  Connect your physical device or start your simulator/emulator.
 2.  Check if device is recognized:
@@ -85,25 +85,25 @@ To set up the project on your local machine, follow these steps:
 
 ---
 
-## ⚙️ Environment and Configuration Notes
+##  Environment and Configuration Notes
 
 *   **API Base URL**: Configured globally in [endpoints.dart](field_track_todo/lib/core/endpoints/endpoints.dart).
     ```dart
     static const String baseUrl = 'https://todo.progressivebyte.com';
     ```
 *   **Authentication Storage**: Uses `shared_preferences` via [shared_preference_helper.dart](field_track_todo/lib/core/services/shared_preference_helper.dart) to persist JWT token pairs (`accessToken` and `refreshToken`). These are automatically attached to HTTP headers in outbound requests.
-*   **State Management**: Built entirely on **GetX** (`get` package) for routing, controllers lifecycle, dependency injection, and reactive state updates (`Rx`).
+*   **State Management**: Built entirely on **Flutter Riverpod** (`flutter_riverpod` package) for state management and dependency injection, alongside standard Flutter Navigator for routing and standard controllers.
 
 ---
 
-## 📁 Folder Structure Overview
+##  Folder Structure Overview
 
 The project uses a structured, feature-first architecture layout:
 
 ```text
 lib/
-├── app.dart                   # Root widget configuring GetMaterialApp, theme, and router
-├── main.dart                  # App entry point, initializes core service binders
+├── app.dart                   # Root widget configuring MaterialApp, theme, and router
+├── main.dart                  # App entry point, initializes Riverpod ProviderContainer
 ├── core/                      # Global/shared utilities and configurations
 │   ├── common/                # Common structures and resources
 │   ├── endpoints/             # API endpoint configuration (endpoints.dart)
@@ -123,19 +123,19 @@ lib/
 │   ├── splash/                # Initial launching visual loader
 │   ├── sync/                  # Offline sync status tracking and queue
 │   └── tasks/                 # Task checklist and progressive summary graphs
-└── routes/                    # Routing maps and route naming bindings (app_routes.dart)
+└── routes/                    # Routing maps and route definitions (app_routes.dart)
 ```
 
 Within each feature module, files are organized as follows:
-*   `controller/` - GetxControllers managing the reactive business logic.
+*   `controller/` - Controllers (ChangeNotifiers) managing the business logic and state, exposed via Riverpod providers.
 *   `model/` - Serializers/Deserializers to convert remote payloads.
-*   `screen/` - Full visual UI layouts.
-*   `service/` - GetConnect networks APIs wrapper.
+*   `screen/` - Full visual UI layouts (ConsumerWidgets/ConsumerStatefulWidgets).
+*   `service/` - API services extending `BaseService` for network calls.
 *   `widgets/` - Local specific widgets.
 
 ---
 
-## 🔄 Offline Synchronization Approach
+##  Offline Synchronization Approach
 
 The offline synchronization is powered by the [SyncController](file:///f:/Flutter/field_track_todo/lib/features/sync/controller/sync_controller.dart):
 
@@ -158,7 +158,7 @@ The offline synchronization is powered by the [SyncController](file:///f:/Flutte
 
 ---
 
-## 📍 Geofencing & Notifications Approach
+##  Geofencing & Notifications Approach
 
 Geofencing is managed via a combination of the [GeofenceService](field_track_todo/lib/core/services/geofence_service.dart) and the [NotificationService](field_track_todo/lib/core/services/notification_service.dart):
 
@@ -180,7 +180,7 @@ Geofencing is managed via a combination of the [GeofenceService](field_track_tod
 
 ---
 
-## ⚠️ Assumptions and Known Limitations
+##  Assumptions and Known Limitations
 
 1.  **Backend API Issue - Inactive Locations**:
     > [!IMPORTANT]

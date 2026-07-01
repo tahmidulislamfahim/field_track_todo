@@ -1,27 +1,32 @@
+import 'package:collection/collection.dart';
 import 'package:field_track_todo/features/sync/controller/sync_controller.dart';
 import 'package:field_track_todo/features/tasks/model/task_model.dart';
 import 'package:field_track_todo/features/tasks/service/task_service.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum TaskFilter { all, pending, completed }
 
-class TasksController extends GetxController {
-  final tasks = <Task>[].obs;
-  final activeFilter = TaskFilter.all.obs;
-  final isLoading = false.obs;
+final tasksControllerProvider = ChangeNotifierProvider.autoDispose((ref) => TasksController(ref));
 
-  final TaskService _taskService = Get.put(TaskService());
-  final SyncController _syncController = Get.put(SyncController());
+class TasksController extends ChangeNotifier {
+  final Ref ref;
 
-  @override
-  void onInit() {
-    super.onInit();
+  List<Task> tasks = [];
+  TaskFilter activeFilter = TaskFilter.all;
+  bool isLoading = false;
+
+  final TaskService _taskService = TaskService();
+
+  TasksController(this.ref) {
     getTodos();
   }
 
   Future<void> getTodos() async {
-    isLoading.value = true;
+    isLoading = true;
+    notifyListeners();
     try {
       final response = await _taskService.fetchTodos();
       if (response.status.isOk) {
@@ -32,17 +37,18 @@ class TasksController extends GetxController {
               .map((json) => Task.fromJson(Map<String, dynamic>.from(json)))
               .toList();
 
+          final syncController = ref.read(syncControllerProvider);
           for (var task in parsed) {
-            final pending = _syncController.pendingChanges.firstWhereOrNull(
+            final pending = syncController.pendingChanges.firstWhereOrNull(
               (p) => p.todoId == task.id,
             );
             if (pending != null) {
-              task.isCompleted.value = pending.isCompleted;
+              task.isCompleted = pending.isCompleted;
               task.updatedAt = pending.updatedAt;
             }
           }
 
-          tasks.assignAll(parsed);
+          tasks = parsed;
         }
       } else {
         EasyLoading.showError('Failed to load tasks.');
@@ -50,20 +56,22 @@ class TasksController extends GetxController {
     } catch (e) {
       EasyLoading.showError('An error occurred loading tasks.');
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> toggleTaskCompletion(Task task) async {
-    final nextStatus = !task.isCompleted.value;
+    final nextStatus = !task.isCompleted;
     final now = DateTime.now();
+    final syncController = ref.read(syncControllerProvider);
 
-    if (_syncController.isOffline.value) {
-      task.isCompleted.value = nextStatus;
+    if (syncController.isOffline) {
+      task.isCompleted = nextStatus;
       task.updatedAt = now;
-      tasks.refresh();
+      notifyListeners();
 
-      _syncController.addPendingChange(
+      syncController.addPendingChange(
         todoId: task.id,
         title: task.title,
         isCompleted: nextStatus,
@@ -88,9 +96,9 @@ class TasksController extends GetxController {
       );
 
       if (response.status.isOk) {
-        task.isCompleted.value = nextStatus;
+        task.isCompleted = nextStatus;
         task.updatedAt = now;
-        tasks.refresh();
+        notifyListeners();
         EasyLoading.showSuccess(
           nextStatus ? 'Task completed' : 'Task reopened',
         );
@@ -120,18 +128,19 @@ class TasksController extends GetxController {
   }
 
   void _saveOfflineFallback(Task task, bool nextStatus, DateTime now) {
-    task.isCompleted.value = nextStatus;
+    task.isCompleted = nextStatus;
     task.updatedAt = now;
-    tasks.refresh();
+    notifyListeners();
 
-    _syncController.addPendingChange(
+    final syncController = ref.read(syncControllerProvider);
+    syncController.addPendingChange(
       todoId: task.id,
       title: task.title,
       isCompleted: nextStatus,
       updatedAt: now,
     );
 
-    _syncController.isOffline.value = true;
+    syncController.isOffline = true;
 
     EasyLoading.showSuccess(
       nextStatus ? 'Task completed offline' : 'Task reopened offline',
@@ -139,7 +148,8 @@ class TasksController extends GetxController {
   }
 
   void changeFilter(TaskFilter filter) {
-    activeFilter.value = filter;
+    activeFilter = filter;
+    notifyListeners();
   }
 
   bool _isToday(DateTime dateTime) {
@@ -153,7 +163,7 @@ class TasksController extends GetxController {
   int get totalCount => tasks.length;
 
   int get completedCount => tasks
-      .where((task) => task.isCompleted.value && _isToday(task.updatedAt))
+      .where((task) => task.isCompleted && _isToday(task.updatedAt))
       .length;
 
   double get progressPercent {
@@ -164,11 +174,11 @@ class TasksController extends GetxController {
   String get progressText => '$completedCount of $totalCount done';
 
   List<Task> get filteredTasks {
-    switch (activeFilter.value) {
+    switch (activeFilter) {
       case TaskFilter.pending:
-        return tasks.where((task) => !task.isCompleted.value).toList();
+        return tasks.where((task) => !task.isCompleted).toList();
       case TaskFilter.completed:
-        return tasks.where((task) => task.isCompleted.value).toList();
+        return tasks.where((task) => task.isCompleted).toList();
       case TaskFilter.all:
         return tasks.toList();
     }

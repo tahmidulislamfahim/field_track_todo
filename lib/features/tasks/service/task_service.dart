@@ -1,9 +1,9 @@
 import 'package:field_track_todo/core/endpoints/endpoints.dart';
 import 'package:field_track_todo/core/services/shared_preference_helper.dart';
+import 'package:field_track_todo/core/services/base_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
-class TaskService extends GetConnect {
+class TaskService extends BaseService {
   Future<Response> fetchTodos() async {
     final String? token = await SharedPreferencesHelper.getAccessToken();
 
