@@ -25,7 +25,7 @@ To set up the project on your local machine, follow these steps:
 
 1.  **Clone the Repository**:
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/tahmidulislamfahim/field_track_todo.git
     cd field_track_todo
     ```
 
@@ -108,8 +108,11 @@ lib/
 │   ├── common/                # Common structures and resources
 │   ├── endpoints/             # API endpoint configuration (endpoints.dart)
 │   ├── services/              # Core background services:
+│   │   ├── base_service.dart          # GetConnect-mimicking HTTP client wrapper
 │   │   ├── geofence_service.dart      # Geolocator stream & boundary comparison logic
+│   │   ├── navigation_service.dart    # Contextless navigation state management
 │   │   ├── notification_service.dart  # Flutter Local Notification triggers
+│   │   ├── provider_locator.dart      # Global Riverpod container locator
 │   │   └── shared_preference_helper.dart # Token store utilities
 │   ├── theme/                 # App styling & theme tokens (app_theme.dart)
 │   └── widgets/               # Reusable UI widgets
@@ -137,7 +140,7 @@ Within each feature module, files are organized as follows:
 
 ##  Offline Synchronization Approach
 
-The offline synchronization is powered by the [SyncController](file:///f:/Flutter/field_track_todo/lib/features/sync/controller/sync_controller.dart):
+The offline synchronization is powered by the [SyncController](lib/features/sync/controller/sync_controller.dart):
 
 1.  **Network State Detection**:
     Uses the `connectivity_plus` package to listen to live internet modifications. Changes are observed via a stream listener in `_initConnectivityListener()`.
@@ -149,7 +152,7 @@ The offline synchronization is powered by the [SyncController](file:///f:/Flutte
     The pending change list is converted to a JSON payload and written to `SharedPreferences` (`pending_todo_sync_changes` key) to prevent data loss on app restart.
 4.  **Auto-Synchronization**:
     *   When the connectivity stream reports that the device is back online, it automatically calls `syncNow()`.
-    *   It wraps the payload and issues a batch `POST` request to the `/api/v1/todos/sync` endpoint using [SyncService](file:///f:/Flutter/field_track_todo/lib/features/sync/service/sync_service.dart).
+    *   It wraps the payload and issues a batch `POST` request to the `/api/v1/todos/sync` endpoint using [SyncService](lib/features/sync/service/sync_service.dart).
 5.  **Reconciliation**:
     *   Upon receiving an `HTTP 200 OK`, the response body yields a list of `synced_ids` and a `failed` list.
     *   Successfully processed IDs are removed from the local database.
